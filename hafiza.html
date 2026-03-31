@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hafıza Oyunu</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            outline: none !important;
+        }
+
+        body { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; background: #1a1a1a; color: white; 
+            font-family: sans-serif; overflow: hidden;
+        }
+
+        #score { font-size: 28px; margin-bottom: 20px; font-weight: bold; }
+
+        .pad-container { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; 
+            background: #333; padding: 25px; border-radius: 50%; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .pad { 
+            width: 130px; height: 130px; cursor: pointer; opacity: 0.4; 
+            transition: all 0.1s ease; border: none;
+        }
+
+        .pad.active { 
+            opacity: 1; transform: scale(0.96); box-shadow: 0 0 40px white;
+        }
+
+        #green { background: #2ecc71; border-radius: 100% 25px 25px 25px; }
+        #red { background: #e74c3c; border-radius: 25px 100% 25px 25px; }
+        #yellow { background: #f1c40f; border-radius: 25px 25px 25px 100%; }
+        #blue { background: #3498db; border-radius: 25px 25px 100% 25px; }
+
+        #start-btn { 
+            margin-top: 40px; padding: 12px 40px; font-size: 20px; 
+            cursor: pointer; border-radius: 50px; border: none; 
+            background: #fff; color: #222; font-weight: bold;
+        }
+
+        /* --- GERİ BUTONU STİLİ --- */
+        #back-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #444;
+            color: white;
+            text-decoration: none;
+            font-family: sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            z-index: 100;
+            cursor: pointer;
+        }
+        #back-button:active {
+            background-color: #666;
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="serbest.html" id="back-button">Geri</a>
+
+    <div id="score">Skor: 0</div>
+    <div class="pad-container">
+        <div class="pad" id="green"></div>
+        <div class="pad" id="red"></div>
+        <div class="pad" id="yellow"></div>
+        <div class="pad" id="blue"></div>
+    </div>
+    <button id="start-btn" onclick="startGame()">Oyunu Başlat</button>
+
+    <script>
+        const colors = ['green', 'red', 'yellow', 'blue'];
+        const freqs = { green: 261.6, red: 329.6, yellow: 392.0, blue: 440.0 };
+        let gameSequence = [];
+        let userSequence = [];
+        let level = 0;
+        let isPlaying = false;
+        let audioCtx;
+
+        colors.forEach(color => {
+            const el = document.getElementById(color);
+            const handleInput = (e) => {
+                // Eğer tıklanan geri butonu değilse işlemleri yap
+                if (e.target.id === 'back-button') return;
+                e.preventDefault(); 
+                userClick(color);
+            };
+            el.addEventListener('mousedown', handleInput);
+            el.addEventListener('touchstart', handleInput, {passive: false});
+        });
+
+        function playTone(color) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = freqs[color];
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+            osc.stop(audioCtx.currentTime + 0.5);
+            
+            const el = document.getElementById(color);
+            el.classList.add('active');
+            setTimeout(() => el.classList.remove('active'), 300);
+        }
+
+        function startGame() {
+            gameSequence = [];
+            level = 0;
+            document.getElementById('start-btn').style.visibility = "hidden";
+            nextRound();
+        }
+
+        function nextRound() {
+            userSequence = [];
+            level++;
+            document.getElementById('score').innerText = `Skor: ${level - 1}`;
+            gameSequence.push(colors[Math.floor(Math.random() * 4)]);
+            playSequence();
+        }
+
+        async function playSequence() {
+            isPlaying = false;
+            await new Promise(r => setTimeout(r, 800));
+            for (const color of gameSequence) {
+                playTone(color);
+                await new Promise(r => setTimeout(r, 600));
+            }
+            isPlaying = true;
+        }
+
+        function userClick(color) {
+            if (!isPlaying) return;
+            
+            playTone(color);
+            userSequence.push(color);
+            
+            const currentStep = userSequence.length - 1;
+            
+            if (userSequence[currentStep] !== gameSequence[currentStep]) {
+                isPlaying = false;
+                setTimeout(() => {
+                    alert("Yanlış bastın! Skorun: " + (level - 1));
+                    document.getElementById('start-btn').style.visibility = "visible";
+                    document.getElementById('start-btn').innerText = "Tekrar Dene";
+                }, 100);
+                return;
+            }
+
+            if (userSequence.length === gameSequence.length) {
+                isPlaying = false;
+                setTimeout(nextRound, 800);
+            }
+        }
+    </script>
+</body>
+</html>

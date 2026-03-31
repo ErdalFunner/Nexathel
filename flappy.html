@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Uçan kuş oyunu</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { 
+            width: 100%; height: 100%; 
+            overflow: hidden; background: #4ec0ca; 
+            position: fixed; touch-action: none; 
+        }
+        canvas { 
+            display: block; width: 100vw; height: 100vh; 
+            image-rendering: pixelated; /* Pikselli, retro görünüm */
+        }
+        #score {
+            position: absolute; top: 10%; width: 100%; text-align: center;
+            color: white; font-family: 'Arial Black', sans-serif; font-size: 60px;
+            text-shadow: 4px 4px 0 #000; z-index: 10; pointer-events: none;
+        }
+
+        /* --- YENİ EKLENEN GERİ BUTONU STİLİ --- */
+        #back-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #e67e22;
+            color: white;
+            text-decoration: none;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 18px;
+            border: 3px solid #000;
+            border-radius: 8px;
+            z-index: 100;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+        }
+        #back-button:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+    </style>
+</head>
+<body>
+    <a href="serbest.html" id="back-button">Geri</a>
+
+    <div id="score">0</div>
+    <canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreDiv = document.getElementById('score');
+
+// --- KAMERA YAKINLAŞTIRMA AYARI ---
+const GAME_SCALE = 1.5; // Oyun dünyasını 1.5 kat büyütür (Yakınlaştırır)
+
+let logicalWidth, logicalHeight;
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    // Mantıksal boyutları hesapla (Ölçeklenmiş dünyanın boyutu)
+    logicalWidth = canvas.width / GAME_SCALE;
+    logicalHeight = canvas.height / GAME_SCALE;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// --- ORİJİNAL FİZİK AYARLARI (Ölçeklenmiş dünyaya göre ayarlandı) ---
+let bird = { 
+    x: 40, y: logicalHeight/2, // Başlangıç pozisyonu yakınlaştırıldı
+    w: 34, h: 24, 
+    v: 0, 
+    g: 0.25,      // Yerçekimi
+    jump: -5.5,   // Dimdik zıplama
+    angle: 0, 
+    frame: 0 
+};
+
+let pipes = [];
+let score = 0;
+let gameActive = false;
+let frameCount = 0;
+
+function drawBackground() {
+    // Gökyüzü (Tüm ekranı kapla)
+    ctx.fillStyle = "#4ec0ca"; ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+    
+    // Pikselli Şehir Silüeti (Ölçeklenmiş dünyaya göre)
+    ctx.fillStyle = "#c9e29b";
+    for(let i=0; i<logicalWidth/30 + 1; i++) {
+        let h = 50 + Math.sin(i + frameCount*0.02) * 15;
+        ctx.fillRect(i*30 - (frameCount*0.6 % 30), logicalHeight-120, 31, h);
+    }
+
+    // Zemin
+    ctx.fillStyle = "#ded895"; ctx.fillRect(0, logicalHeight-50, logicalWidth, 50);
+    ctx.fillStyle = "#95c11f"; ctx.fillRect(0, logicalHeight-60, logicalWidth, 10);
+    ctx.strokeStyle = "#543847"; ctx.lineWidth = 3;
+    ctx.strokeRect(-5, logicalHeight-60, logicalWidth+10, 10);
+}
+
+function drawBird(x, y, frame, v) {
+    ctx.save();
+    ctx.translate(x + 17, y + 12);
+    
+    // Klasik Rotasyon
+    let angle = Math.max(-Math.PI/4, Math.min(Math.PI/2, v * 0.1));
+    ctx.rotate(angle);
+    
+    let wing = Math.sin(frame * 0.7) * 7;
+    
+    // Orijinal Sarı Gövde
+    ctx.fillStyle = "#f1c40f"; ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(-17, -12, 34, 24, 10); ctx.fill(); ctx.stroke();
+    
+    // Kanat
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.roundRect(-12, -4 + wing, 15, 10, 5); ctx.fill(); ctx.stroke();
+    
+    // Göz
+    ctx.fillStyle = "#fff"; ctx.fillRect(5, -8, 9, 9); ctx.strokeRect(5, -8, 9, 9);
+    ctx.fillStyle = "#000"; ctx.fillRect(10, -5, 3, 3);
+    
+    // Gaga
+    ctx.fillStyle = "#e67e22"; ctx.fillRect(11, 2, 10, 7); ctx.strokeRect(11, 2, 10, 7);
+    ctx.restore();
+}
+
+function drawPipe(x, top, bottom) {
+    const w = 65; const headH = 30;
+    // Orijinal Pikselli Yeşil (Canlı)
+    ctx.fillStyle = "#73bf2e"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+    
+    // Üst
+    ctx.fillRect(x, 0, w, top); ctx.strokeRect(x, -2, w, top+2);
+    ctx.fillRect(x-6, top-headH, w+12, headH); ctx.strokeRect(x-6, top-headH, w+12, headH);
+    // Alt
+    ctx.fillRect(x, logicalHeight - bottom, w, bottom); ctx.strokeRect(x, logicalHeight - bottom, w, bottom+2);
+    ctx.fillRect(x-6, logicalHeight - bottom, w+12, headH); ctx.strokeRect(x-6, logicalHeight - bottom, w+12, headH);
+}
+
+function update() {
+    if (!gameActive) return;
+
+    // --- ORİJİNAL FİZİK MOTORU ---
+    bird.v += bird.g;
+    bird.y += bird.v;
+    bird.frame++;
+
+    // Boru Üretimi (Daha dar alanda daha sık boru)
+    if (frameCount % 80 === 0) {
+        let gap = 150; // Yakın çekim için boşluk biraz daraltıldı
+        let h = Math.random() * (logicalHeight - gap - 200) + 100;
+        pipes.push({ x: logicalWidth, top: h, bottom: logicalHeight - h - gap, scored: false });
+    }
+
+    pipes.forEach((p, i) => {
+        p.x -= 3.5; // Boru hızı
+        // Çarpışma Kontrolü
+        if (bird.x + 30 > p.x && bird.x + 4 < p.x + 65) {
+            if (bird.y + 4 < p.top || bird.y + 20 > logicalHeight - p.bottom) gameActive = false;
+        }
+        // Puan
+        if (!p.scored && p.x < bird.x) { score++; scoreDiv.innerText = score; p.scored = true; }
+    });
+
+    if (pipes.length > 0 && pipes[0].x < -100) pipes.shift();
+    if (bird.y > logicalHeight - 60 || bird.y < 0) gameActive = false;
+    frameCount++;
+}
+
+function draw() {
+    ctx.save();
+    // TÜM OYUNU ÖLÇEKLENDİR (YAKINLAŞTIR)
+    ctx.scale(GAME_SCALE, GAME_SCALE);
+    
+    drawBackground();
+    pipes.forEach(p => drawPipe(p.x, p.top, p.bottom));
+    drawBird(bird.x, bird.y, bird.frame, bird.v);
+
+    if (!gameActive) {
+        ctx.fillStyle = "rgba(0,0,0,0.4)"; ctx.fillRect(0,0,logicalWidth,logicalHeight);
+        ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.font = "bold 24px sans-serif";
+        // Yazıyı mantıksal merkeze çiz
+        ctx.fillText("Tıkla Ve Oyna", logicalWidth/2, logicalHeight/2);
+    }
+    
+    ctx.restore(); // Ölçeklendirmeyi sıfırla (Skor vb. için)
+    requestAnimationFrame(draw);
+}
+
+function reset(e) {
+    // Eğer tıklanan şey Geri butonuysa oyunu sıfırlama veya zıplatma
+    if (e.target.id === 'back-button') return;
+    
+    if(e) e.preventDefault();
+    if (!gameActive) {
+        // Reset yaparken mantıksal boyutları kullan
+        bird.y = logicalHeight/2; bird.v = 0; pipes = []; score = 0;
+        scoreDiv.innerText = "0"; gameActive = true; frameCount = 0;
+    } else {
+        bird.v = bird.jump; // Dimdik zıplama
+    }
+}
+
+// Kontroller
+window.addEventListener('touchstart', reset, {passive: false});
+window.addEventListener('mousedown', reset);
+draw();
+setInterval(update, 1000/60);
+</script>
+</body>
+</html>

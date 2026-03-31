@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dinozor</title>
+    <style>
+        html, body { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #f7f7f7; font-family: 'Courier New', Courier, monospace; touch-action: none; 
+        }
+
+        /* GERİ DÜĞMESİ STİLİ */
+        #back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #535353;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 100;
+            text-decoration: none;
+        }
+
+        #game { 
+            width: 95vw; max-width: 800px; height: 200px; 
+            position: relative; background: white; 
+            border-bottom: 4px solid #535353; overflow: hidden;
+        }
+
+        #score-container { 
+            width: 95vw; max-width: 800px; text-align: right; 
+            margin-bottom: 5px; color: #535353; font-size: 28px; font-weight: bold;
+        }
+        
+        #dino { 
+            width: 44px; height: 47px; position: absolute; bottom: -10px; left: 50px;
+            background-image: url('dino.png'); background-size: contain; background-repeat: no-repeat; z-index: 2;
+        }
+
+        .cactus-group { position: absolute; bottom: -22px; display: flex; gap: 1px; }
+        .cactus { width: 25px; height: 45px; background-image: url('cactus.png'); background-size: contain; background-repeat: no-repeat; }
+    </style>
+</head>
+<body>
+
+    <a href="serbest.html" id="back-btn">Geri</a>
+
+    <div id="score-container">
+        <div id="score">00000</div>
+    </div>
+
+    <div id="game">
+        <div id="dino"></div>
+    </div>
+
+<script>
+    const dino = document.getElementById("dino");
+    const scoreElement = document.getElementById("score");
+    const game = document.getElementById("game");
+    const backBtn = document.getElementById("back-btn");
+    
+    let isJumping = false;
+    let score = 0;
+    let gameActive = true;
+    let baseBottom = -10;
+    let yVelocity = 0;
+    let gravity = 1.1; 
+    let jumpPower = 16;
+    let currentBottom = baseBottom;
+
+    let gameSpeed = 10;
+    let spawnRate = 1000;
+
+    // Tıklama olayları (Düğmeye basınca zıplamaması için kontrol eklendi)
+    window.addEventListener('mousedown', (e) => {
+        if (e.target !== backBtn) handleInput();
+    });
+    window.addEventListener('touchstart', (e) => { 
+        if (e.target !== backBtn) {
+            e.preventDefault(); 
+            handleInput(); 
+        }
+    }, { passive: false });
+    window.addEventListener('keydown', (e) => { if(e.code === "Space") handleInput(); });
+
+    function handleInput() {
+        if (!gameActive) { location.reload(); return; }
+        if (!isJumping) { isJumping = true; yVelocity = jumpPower; }
+    }
+
+    function updatePhysics() {
+        if (!gameActive) return;
+        if (isJumping) {
+            yVelocity -= gravity;
+            currentBottom += yVelocity;
+            if (currentBottom <= baseBottom) {
+                currentBottom = baseBottom;
+                isJumping = false;
+                yVelocity = 0;
+            }
+            dino.style.bottom = currentBottom + "px";
+        }
+        score += 0.5; 
+        scoreElement.innerText = Math.floor(score).toString().padStart(5, '0');
+        gameSpeed += 0.006; 
+        spawnRate = Math.max(350, 1000 - (score / 3)); 
+        requestAnimationFrame(updatePhysics);
+    }
+
+    function spawnObstacle() {
+        if (!gameActive) return;
+        const group = document.createElement("div");
+        group.className = "cactus-group";
+        
+        let chance = Math.random();
+        let count = (chance > 0.3) ? (chance > 0.7 ? 3 : 2) : 1;
+        
+        for(let i=0; i < count; i++) {
+            const c = document.createElement("div");
+            c.className = "cactus";
+            group.appendChild(c);
+        }
+        game.appendChild(group);
+        let x = game.offsetWidth;
+        let moveAction = setInterval(() => {
+            if (!gameActive) { clearInterval(moveAction); return; }
+            x -= gameSpeed; 
+            group.style.left = x + "px";
+            let d = dino.getBoundingClientRect();
+            let g = group.getBoundingClientRect();
+            if (d.right - 18 > g.left + 5 && d.left + 18 < g.right - 5 && d.bottom > g.top + 15) {
+                gameActive = false;
+                alert("OYUN BİTTİ!\nSKORUN: " + Math.floor(score));
+            }
+            if (x < -200) { clearInterval(moveAction); group.remove(); }
+        }, 16);
+        let nextTime = Math.random() * spawnRate + (spawnRate / 2);
+        setTimeout(spawnObstacle, nextTime);
+    }
+    requestAnimationFrame(updatePhysics);
+    setTimeout(spawnObstacle, 800);
+</script>
+</body>
+</html>

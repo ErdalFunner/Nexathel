@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Erdal Fun | v15</title>
+    <title>Erdal Fun | v16</title>
     <style>
         :root { --p: #007aff; --bg: #000; --txt: #fff; --gold: #ffd700; --red: #ff3b30; --green: #2ecc71; --orange: #ff9500; }
         body, html { margin:0; padding:0; height:100%; font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; overflow: hidden; }
@@ -37,10 +37,6 @@
 </head>
 <body>
 
-<div id="fullScreenWarn" style="position:fixed; top:0; left:0; width:100%; background:var(--b); color:var(--m); text-align:center; padding:10px; z-index:9999; font-size:14px; border-bottom:2px solid var(--p); backdrop-filter:blur(10px);">
-  📢 En iyi deneyim için tarayıcıyı <b>Tam Ekran</b> yapın (Üç nokta ⋮ menüsünden). 
-  <button onclick="this.parentElement.style.display='none'" style="margin-left:15px; background:var(--p); border:none; color:white; border-radius:5px; cursor:pointer; padding:2px 10px;">Tamam</button>
-</div>
 <div id="toast">🟡 ERDAL JETONU KAZANDIN!</div>
 <div class="stats-bar"><span id="jeton-count">0/5</span> 🪙</div>
 
@@ -59,40 +55,51 @@
         <div class="card locked btn-premium" id="card-voxel" onclick="goPremium('voxel.html')">💎 🧱 Voxel</div>
         <div class="card locked btn-premium" id="card-mini" onclick="goPremium('mini.html')"> 💎 ⚔️ Arena</div>
     </div>
-</div>
-
-<div id="m-guide" class="modal">
-    <div class="modal-content">
-        <h1 style="color:var(--p); text-align:center;">🚀 ERDAL FUN REHBERİ</h1>
-        
-        <div class="guide-box">
-            <h3>🎮 Nasıl Oynanır? </h3>
-            <p><b>• Hız Testi:</b> Ekran yeşil olunca en hızlı şekilde dokun.</p>
-            <p><b>• Daire:</b> Beyaz çizgiyi takip ederek en düzgün daireyi çiz.</p>
-            <p><b>• Hızlı Yazma:</b> Yukarıdaki cümleyi hatasız ve yıldırım hızında yaz.</p>
-            <p><b>• Clicker Pro:</b> Tuşa basarak puan topla ve marketten geliştirmeler al.</p>
-            <p><b>• İnek Nerede:</b> Samanı ekranda gezdir, sesin en çok çıktığı yerde samanı bırak ve "BURADA" butonuna tıkla.</p>
-        </div>
-
-        <div class="guide-box">
-            <h3>🪙 Jetonlar Ne İşe Yarar?</h3>
-            <p>5 jetonun tamamını topladığında <b>Voxel</b> ve <b>Arena</b> oyunlarının kilitleri açılır ve parlamaya başlar.</p>
-        </div>
-
-        <div class="guide-box">
-            <h3>🎯 Hedeflerin (Jeton Alımı)</h3>
-            <p>• Hız: 320ms altı | • Daire: %85 başarı | • Yazma: 0.500 oran altı | • Clicker: 5500 Puan | • İnek: 100 mesafe altı.</p>
-        </div>
-        
-        <button onclick="toggleModal('m-guide', false)" style="width:100%; padding:15px; background:var(--p); color:white; border:none; border-radius:10px; font-weight:bold;">ANLADIM!</button>
-    </div>
+    
+    <button onclick="window.location.href='serbest.html'" style="margin-top: 20px; width: 90%; max-width: 500px; padding: 15px; background: transparent; color: var(--txt); border: 2px dashed #444; border-radius: 15px; font-weight: bold; cursor: pointer;">✨ Serbest Takıl</button>
 </div>
 
 <div id="m-settings" class="modal">
     <div class="modal-content">
         <h2 style="text-align:center">⚙️ Ayarlar</h2>
-        <button onclick="resetAllData()" style="width:100%; padding:15px; background:var(--red); color:white; border:none; border-radius:10px; font-weight:bold;">⚠️ VERİLERİ SIFIRLA</button>
-        <button onclick="toggleModal('m-settings', false)" style="width:100%; padding:10px; margin-top:10px; background:#444; color:white; border:none; border-radius:10px;">Kapat</button>
+        <p style="text-align:center; opacity:0.7;">Oyun verilerini buradan yönetebilirsin.</p>
+        <button onclick="resetAllData()" style="width:100%; padding:15px; background:var(--red); color:white; border:none; border-radius:10px; font-weight:bold; margin-top:10px;">⚠️ VERİLERİ SIFIRLA</button>
+        <button onclick="toggleModal('m-settings', false)" style="width:100%; padding:10px; margin-top:20px; background:#444; color:white; border:none; border-radius:10px;">Kapat</button>
+    </div>
+</div>
+
+<div id="m-guide" class="modal">
+    <div class="modal-content" style="max-height: 85vh; border: 3px solid var(--p);">
+        <h1 style="color:var(--p); text-align:center; margin-bottom:10px;">🛡️ ERDAL FUN: RESMİ REHBER</h1>
+        
+        <div class="guide-box">
+            <h3>🎮 Oyunun Amacı</h3>
+            <p>Ana ekrandaki 5 temel görevi başarıyla tamamlayıp <b>5 Altın Jetonu</b> toplamalısın. Tüm jetonları topladığında efsanevi <b>Premium Oyunlar</b> kilidi açılır.</p>
+        </div>
+
+        <div class="guide-box" style="border-left-color: var(--orange);">
+            <h3 style="color:var(--orange);">🕹️ Görev Detayları</h3>
+            <p><b>• ⚡ Hız Testi:</b> Ekran kıpkırmızı olduğunda  bekle. Yeşil yandığı an dokun! <i>(Hedef: 320ms altı)</i></p>
+            <p><b>• ⭕ Kusursuz Daire:</b> Beyaz rehber çizgiyi en az sapma ile takip et. Çizginin iki ucunu birleştiremez veya çok hızlı çizersen başarın düşer! <i>(Hedef: %85 Başarı)</i></p>
+            <p><b>• ⌨️ Yıldırım Yazma:</b> Verilen cümleyi klavyeden hatasız gir. Harf başına geçen süre hesaplanır. <i>(Hedef: 0.500 oran altı)</i></p>
+            <p><b>• 🖱️ Clicker Pro:</b> Tuşa seri basarak puan topla. Marketten aldığın geliştirmeler (Fare, Robot, CPU) sen basmasan da puan kazandırır. <i>(Hedef: 5500 Puan)</i></p>
+            <p><b>• 🐮 İnek Nerede:</b> Samanı ekranda gezdirirken çıkan sese odaklan. Ses tizleşirse ve artarsa yaklaşıyorsun demektir. <b>"BURADA"</b> butonuna bas ve eğer doğru yerde olduğunu tahmin ettiysen kazandın! <i>(Hedef:1 tur kazanmak)</i></p>
+        </div>
+
+        <div class="guide-box" style="border-left: 4px solid var(--gold); background: rgba(255, 215, 0, 0.08);">
+            <h3 style="color:var(--gold);">💎 PREMIUM OYUNLAR (V.I.P)</h3>
+            <p><b>🧱 VOXEL DÜNYASI:</b> Minecraft tarzı, tamamen 3 boyutlu bir inşa alanı. Blokları yerleştir, kır ve kendi piksellerden oluşan sanat eserini yarat. Sınır sensin!</p>
+            <p><b>⚔️ ARENA MÜCADELESİ:</b> En kapsamlı ErdalFun oyunu olan bu oyun seni bir savaş arenasında basit karakterlerle keyif çıkarmanı sağlar.</p>
+            <p><i>⚠️ Bu oyunlar sadece tüm jetonları toplayan gerçek "Erdal Fun" ustaları içindir.</i></p>
+        </div>
+
+        <div class="guide-box" style="border-left-color: var(--red);">
+            <h3 style="color:var(--red);">⚠️ Kritik İpuçları</h3>
+            <p>1. **TAM EKRAN:** Tarayıcınızın sağ üstündeki <b>üç noktaya (⋮)</b> basıp <b>Tam Ekran</b> moduna geçmek, özellikle Daire ve İnek oyunlarında görüş alanınızı %40 artırır.</p>
+            <p>2. **VERİ SIFIRLAMA:** Eğer her şeye baştan başlamak istersen Ayarlar (⚙️) kısmından tüm jetonlarını sıfırlayabilirsin.</p>
+        </div>
+        
+        <button onclick="toggleModal('m-guide', false)" style="width:100%; padding:18px; background:var(--p); color:white; border:none; border-radius:15px; font-weight:bold; font-size:1.1rem; cursor:pointer; transition: 0.3s;">ANLADIM, ŞİMDİ HAZIRIM! 🚀</button>
     </div>
 </div>
 
@@ -122,9 +129,11 @@
 
 <div id="p-inek" class="page">
     <button class="back" onclick="goHome()">Geri</button>
-    <div id="hearts" style="font-size:2rem;">❤️❤️❤️</div>
+    <div id="hearts" style="font-size:2rem; margin-top:20px;">❤️❤️❤️</div>
+    
+    <button onclick="inekBul()" style="margin-top:20px; padding:12px 40px; background:#2ecc71; border:none; color:white; border-radius:20px; font-weight:bold; z-index:100;">BURADA!</button>
+    
     <div id="saman" style="width:80px; height:80px; font-size:3.5rem; position:absolute; touch-action:none; display:flex; align-items:center; justify-content:center;">🌾</div>
-    <button onclick="inekBul()" style="position:absolute; bottom:30px; padding:10px 30px; background:#2ecc71; border:none; color:white; border-radius:20px;">BURADA!</button>
 </div>
 
 <script>
