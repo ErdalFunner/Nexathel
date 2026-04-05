@@ -33,6 +33,31 @@
         #cl-btn { width:130px; height:130px; border-radius:50%; background:radial-gradient(#ff3b30, #8b0000); color:white; border:8px solid #333; font-weight:bold; cursor:pointer; }
         input { background:#222; border:2px solid #444; color:white; padding:15px; border-radius:12px; width:85%; text-align:center; font-size: 1.1rem; outline:none; }
         #toast { position:fixed; bottom:-100px; left:50%; transform:translateX(-50%); background:var(--gold); color:black; padding:15px 35px; border-radius:50px; font-weight:bold; transition: 0.5s; z-index:1000; }
+   .download-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(45deg, #ff3b30, #ff9500);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            border: 2px solid #fff;
+            animation: shake 0.5s infinite, glow 1.5s infinite alternate;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+            100% { transform: rotate(-2deg); }
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #ff3b30; }
+            to { box-shadow: 0 0 25px #ff9500, 0 0 10px #fff; }
+        }
     </style>
 </head>
 <body>
@@ -41,6 +66,7 @@
 <div class="stats-bar"><span id="jeton-count">0/5</span> 🪙</div>
 
 <div id="home" class="page active">
+ <a href="https://nexathel-dowloand-apk.netlify.app/" class="download-btn">📥 Apk İndir</a>
     <h1>NEXATHEL v16 🚀</h1>
     <div style="display:flex; gap:10px; margin-bottom:15px;">
         <button onclick="toggleModal('m-guide', true)" style="background:var(--p); border:none; color:white; padding:8px 15px; border-radius:10px;">❓ Nasıl Oynanır?</button>
