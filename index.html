@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Erdal Fun | v16</title>
+    <title>Nexathel | v16</title>
     <style>
         :root { --p: #007aff; --bg: #000; --txt: #fff; --gold: #ffd700; --red: #ff3b30; --green: #2ecc71; --orange: #ff9500; }
         body, html { margin:0; padding:0; height:100%; font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; overflow: hidden; }
@@ -37,11 +37,11 @@
 </head>
 <body>
 
-<div id="toast">🟡 ERDAL JETONU KAZANDIN!</div>
+<div id="toast">🟡 NEXATHEL JETONU KAZANDIN!</div>
 <div class="stats-bar"><span id="jeton-count">0/5</span> 🪙</div>
 
 <div id="home" class="page active">
-    <h1>ERDAL FUN 🚀</h1>
+    <h1>NEXATHEL v16 🚀</h1>
     <div style="display:flex; gap:10px; margin-bottom:15px;">
         <button onclick="toggleModal('m-guide', true)" style="background:var(--p); border:none; color:white; padding:8px 15px; border-radius:10px;">❓ Nasıl Oynanır?</button>
         <button onclick="toggleModal('m-settings', true)" style="background:#444; border:none; color:white; padding:8px 15px; border-radius:10px;">⚙️ Ayarlar</button>
@@ -70,7 +70,7 @@
 
 <div id="m-guide" class="modal">
     <div class="modal-content" style="max-height: 85vh; border: 3px solid var(--p);">
-        <h1 style="color:var(--p); text-align:center; margin-bottom:10px;">🛡️ ERDAL FUN: RESMİ REHBER</h1>
+        <h1 style="color:var(--p); text-align:center; margin-bottom:10px;"> NEXATHEL v16 REHBERİ</h1>
         
         <div class="guide-box">
             <h3>🎮 Oyunun Amacı</h3>
@@ -79,7 +79,7 @@
 
         <div class="guide-box" style="border-left-color: var(--orange);">
             <h3 style="color:var(--orange);">🕹️ Görev Detayları</h3>
-            <p><b>• ⚡ Hız Testi:</b> Ekran kıpkırmızı olduğunda  bekle. Yeşil yandığı an dokun! <i>(Hedef: 320ms altı)</i></p>
+            <p><b>• ⚡ Hız Testi:</b> Ekran kıpkırmızı olduğunda bekle. Yeşil yandığı an dokun! <i>(Hedef: 320ms altı)</i></p>
             <p><b>• ⭕ Kusursuz Daire:</b> Beyaz rehber çizgiyi en az sapma ile takip et. Çizginin iki ucunu birleştiremez veya çok hızlı çizersen başarın düşer! <i>(Hedef: %85 Başarı)</i></p>
             <p><b>• ⌨️ Yıldırım Yazma:</b> Verilen cümleyi klavyeden hatasız gir. Harf başına geçen süre hesaplanır. <i>(Hedef: 0.500 oran altı)</i></p>
             <p><b>• 🖱️ Clicker Pro:</b> Tuşa seri basarak puan topla. Marketten aldığın geliştirmeler (Fare, Robot, CPU) sen basmasan da puan kazandırır. <i>(Hedef: 5500 Puan)</i></p>
@@ -89,8 +89,8 @@
         <div class="guide-box" style="border-left: 4px solid var(--gold); background: rgba(255, 215, 0, 0.08);">
             <h3 style="color:var(--gold);">💎 PREMIUM OYUNLAR (V.I.P)</h3>
             <p><b>🧱 VOXEL DÜNYASI:</b> Minecraft tarzı, tamamen 3 boyutlu bir inşa alanı. Blokları yerleştir, kır ve kendi piksellerden oluşan sanat eserini yarat. Sınır sensin!</p>
-            <p><b>⚔️ ARENA MÜCADELESİ:</b> En kapsamlı ErdalFun oyunu olan bu oyun seni bir savaş arenasında basit karakterlerle keyif çıkarmanı sağlar.</p>
-            <p><i>⚠️ Bu oyunlar sadece tüm jetonları toplayan gerçek "Erdal Fun" ustaları içindir.</i></p>
+            <p><b>⚔️ ARENA MÜCADELESİ:</b> En kapsamlı Nexathel v16 oyunu olan bu oyun seni bir savaş arenasında basit karakterlerle keyif çıkarmanı sağlar.</p>
+            <p><i>⚠️ Bu oyunlar sadece tüm jetonları toplayan gerçek "Nexathel v16" ustaları içindir.</i></p>
         </div>
 
         <div class="guide-box" style="border-left-color: var(--red);">
@@ -137,11 +137,11 @@
 </div>
 
 <script>
-let jetonlar = JSON.parse(localStorage.getItem('erdal_jetonlar')) || { hiz:false, daire:false, yazi:false, click:false, inek:false };
+let jetonlar = JSON.parse(localStorage.getItem('nexathel_jetonlar')) || { hiz:false, daire:false, yazi:false, click:false, inek:false };
 let auCtx;
 
 function save() {
-    localStorage.setItem('erdal_jetonlar', JSON.stringify(jetonlar));
+    localStorage.setItem('nexathel_jetonlar', JSON.stringify(jetonlar));
     let total = Object.values(jetonlar).filter(v=>v===true).length;
     let countEl = document.getElementById('jeton-count');
     if(countEl) countEl.innerText = `${total}/5`;
@@ -182,7 +182,7 @@ function initCircle(){
     c.onpointermove=(e)=>{ if(!draw) return; let rect=c.getBoundingClientRect(), px=e.clientX-rect.left, py=e.clientY-rect.top; pts.push({px,py}); x.fillStyle="white"; x.fillRect(px,py,4,4); };
     c.onpointerup=()=>{ 
         draw=false; 
-        if(pts.length < 60) { // Yeterli çizim yapılmadıysa iptal et
+        if(pts.length < 60) { 
             document.getElementById('d-res').innerText = "%0";
             return; 
         }
@@ -190,7 +190,6 @@ function initCircle(){
         pts.forEach(p => { totalErr += Math.abs(Math.hypot(p.px - mx, p.py - my) - targetR); });
         let score = Math.max(0, 100 - (totalErr / pts.length * 2.2));
         
-        // Yarım daire hilesini engelleme:
         let start = pts[0], end = pts[pts.length-1];
         let gap = Math.hypot(start.px - end.px, start.py - end.py);
         if(gap > 110) score = score / 2; 
@@ -201,7 +200,7 @@ function initCircle(){
 }
 
 // YAZMA (0.500)
-const words=["Hızlı olan kazansın!","Erdal Fun v16 burada.","Klavye hızı çok önemli.","Zaman akıp gidiyor.","Kod yazmak bir sanattır."];
+const words=["Hızlı olan kazansın!","Nexathel v16 burada.","Klavye hızı çok önemli.","Zaman akıp gidiyor.","Kod yazmak bir sanattır."];
 let yS, yA=false, yC, yDone=false;
 function initYazi(){
     openPage('p-yazi'); yC=words[Math.floor(Math.random()*words.length)];
