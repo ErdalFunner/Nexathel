@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stack Game Play</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Arial Black', sans-serif; touch-action: manipulation; }
+        canvas { display: block; width: 100vw; height: 100vh; background: linear-gradient(#1e3c72, #2a5298); }
+        #ui { position: absolute; top: 15%; width: 100%; text-align: center; pointer-events: none; z-index: 10; }
+        #score { font-size: 120px; color: white; opacity: 0.9; text-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .msg { color: #fff; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; background: rgba(0,0,0,0.2); padding: 10px 30px; border-radius: 50px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <div id="score">0</div>
+    <div id="msg" class="msg">BAŞLAMAK İÇİN DOKUN</div>
+</div>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    const msgElement = document.getElementById('msg');
+
+    let width, height, stack, gameActive, score, speed, activeBlock, viewY, moveSide;
+
+    function init() {
+        resize();
+        reset();
+        requestAnimationFrame(loop);
+    }
+
+    function reset() {
+        stack = [];
+        score = 0;
+        speed = 3;
+        gameActive = false;
+        viewY = 0;
+        moveSide = 1; // 1: soldan, -1: sağdan
+        scoreElement.innerText = score;
+        msgElement.innerText = "BAŞLAMAK İÇİN DOKUN";
+        msgElement.style.display = "inline-block";
+        
+        // Zemin bloğu merkezde
+        stack.push({ x: width / 2 - 100, y: 0, w: 200, d: 200, color: '#ff4757' });
+        
+        prepareNextBlock();
+    }
+
+    function prepareNextBlock() {
+        const last = stack[stack.length - 1];
+        // Bloğu ekranın dışından başlat
+        let startX = moveSide === 1 ? -200 : width;
+        
+        activeBlock = {
+            x: startX, 
+            y: (stack.length) * 40,
+            w: last.w,
+            d: last.d,
+            dir: moveSide,
+            color: `hsl(${(stack.length * 20) % 360}, 70%, 60%)`
+        };
+        moveSide *= -1; // Bir sonraki turda diğer taraftan gelsin
+    }
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+
+    function drawIsoBox(x, y, w, d, color) {
+        const renderY = height - 250 - y + viewY;
+        const h = 40; 
+        const isoX = 30; // 3D açı derinliği
+
+        // Yan Yüz (Gölge)
+        ctx.fillStyle = shadeColor(color, -20);
+        ctx.beginPath();
+        ctx.moveTo(x + w, renderY);
+        ctx.lineTo(x + w + isoX, renderY - 20);
+        ctx.lineTo(x + w + isoX, renderY - 20 - h);
+        ctx.lineTo(x + w, renderY - h);
+        ctx.fill();
+
+        // Ön Yüz
+        ctx.fillStyle = shadeColor(color, -10);
+        ctx.beginPath();
+        ctx.moveTo(x, renderY);
+        ctx.lineTo(x + w, renderY);
+        ctx.lineTo(x + w, renderY - h);
+        ctx.lineTo(x, renderY - h);
+        ctx.fill();
+
+        // Üst Yüz
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, renderY - h);
+        ctx.lineTo(x + isoX, renderY - h - 20);
+        ctx.lineTo(x + w + isoX, renderY - h - 20);
+        ctx.lineTo(x + w, renderY - h);
+        ctx.fill();
+
+        // Parlaklık/Kenar hattı
+        ctx.strokeStyle = "rgba(255,255,255,0.15)";
+        ctx.stroke();
+    }
+
+    function shadeColor(color, percent) {
+        let h = color.match(/\d+/g);
+        return `hsl(${h[0]}, ${h[1]}%, ${Math.max(0, parseInt(h[2]) + percent)}%)`;
+    }
+
+    function loop() {
+        ctx.clearRect(0, 0, width, height);
+
+        const targetViewY = Math.max(0, (stack.length - 4) * 40);
+        viewY += (targetViewY - viewY) * 0.1;
+
+        stack.forEach(b => drawIsoBox(b.x, b.y, b.w, b.d, b.color));
+
+        if (gameActive) {
+            drawIsoBox(activeBlock.x, activeBlock.y, activeBlock.w, activeBlock.d, activeBlock.color);
+            activeBlock.x += speed * activeBlock.dir;
+            
+            // Ekrandan tamamen çıkarsa kaybet
+            if (activeBlock.dir === 1 && activeBlock.x > width) gameOver();
+            if (activeBlock.dir === -1 && activeBlock.x + activeBlock.w < 0) gameOver();
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    function gameOver() {
+        gameActive = false;
+        msgElement.innerText = "YENİLDİN! TEKRAR DENE";
+        msgElement.style.display = "inline-block";
+    }
+
+    function handleInput(e) {
+        if (e.type === 'touchstart') e.preventDefault();
+        
+        if (!gameActive) {
+            reset();
+            gameActive = true;
+            msgElement.style.display = "none";
+            return;
+        }
+
+        const last = stack[stack.length - 1];
+        const delta = activeBlock.x - last.x;
+        const overlap = activeBlock.w - Math.abs(delta);
+
+        if (overlap > 10) { // 10px tolerans ile daha rahat oynanış
+            activeBlock.w = overlap;
+            if (delta < 0) activeBlock.x = last.x; // Soldan geliyorsa hizala
+            
+            stack.push({...activeBlock});
+            score++;
+            scoreElement.innerText = score;
+            speed += 0.12; 
+            prepareNextBlock();
+        } else {
+            gameOver();
+        }
+    }
+
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('mousedown', handleInput);
+    canvas.addEventListener('touchstart', handleInput, {passive: false});
+
+    init();
+</script>
+
+</body>
+</html>
