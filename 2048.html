@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>2048 game</title>
+    <style>
+        body { background: #faf8ef; color: #776e65; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; touch-action: none; }
+        .header { width: 450px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .score-box { display: flex; gap: 10px; }
+        .stat { background: #bbada0; padding: 10px; border-radius: 6px; color: white; font-weight: bold; text-align: center; min-width: 90px; }
+        .stat-label { font-size: 13px; display: block; opacity: 0.9; }
+        
+        .grid { width: 450px; height: 450px; background: #bbada0; border-radius: 8px; display: grid; grid-template: repeat(4, 1fr) / repeat(4, 1fr); gap: 15px; padding: 15px; box-sizing: border-box; position: relative; }
+        .cell { background: rgba(238, 228, 218, 0.35); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; transition: 0.1s; }
+        
+        /* Renkler */
+        .tile-2 { background: #eee4da; } .tile-4 { background: #ede0c8; } .tile-8 { background: #f2b179; color: #fff; }
+        .tile-16 { background: #f59563; color: #fff; } .tile-32 { background: #f67c5f; color: #fff; }
+        .tile-64 { background: #f65e3b; color: #fff; } .tile-128 { background: #edcf72; color: #fff; font-size: 32px; }
+        .tile-256 { background: #edcc61; color: #fff; font-size: 32px; } .tile-512 { background: #edc850; color: #fff; }
+        .tile-1024 { background: #edc53f; color: #fff; font-size: 26px; } .tile-2048 { background: #edc22e; color: #fff; font-size: 26px; }
+
+        /* Parlama Efekti (2048 ve Üstü) */
+        .glow { 
+            box-shadow: 0 0 20px 5px rgba(237, 194, 46, 0.8); 
+            animation: pulse 1.5s infinite alternate;
+            z-index: 2;
+        }
+        @keyframes pulse {
+            from { transform: scale(1); box-shadow: 0 0 15px #edc22e; }
+            to { transform: scale(1.05); box-shadow: 0 0 30px #f1d06a; }
+        }
+
+        /* Popup */
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(238, 228, 218, 0.85); display: none; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; z-index: 100; text-align: center; padding: 20px; box-sizing: border-box; }
+        #overlay h2 { font-size: 44px; margin: 0; color: #776e65; }
+        #overlay button { margin-top: 25px; padding: 15px 40px; background: #8f7a66; color: white; border: none; border-radius: 5px; font-weight: bold; font-size: 20px; cursor: pointer; }
+        #overlay button:hover { background: #7f6a56; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="font-size: 60px; margin: 0;">2048</h1>
+        <div class="score-box">
+            <div class="stat"><span class="stat-label">PUAN</span><span id="score">0</span></div>
+            <div class="stat"><span class="stat-label">MAX</span><span id="best">0</span></div>
+        </div>
+    </div>
+    <div class="grid" id="grid">
+        <div id="overlay">
+            <h2 id="status-text">Kaybettin!</h2>
+            <button id="action-btn">Tamam</button>
+        </div>
+    </div>
+
+    <script>
+        const gridDisplay = document.getElementById('grid');
+        const scoreDisplay = document.getElementById('score');
+        const bestDisplay = document.getElementById('best');
+        const overlay = document.getElementById('overlay');
+        const statusText = document.getElementById('status-text');
+        const actionBtn = document.getElementById('action-btn');
+        
+        let tiles = [], score = 0, best = localStorage.getItem('bestScore2048') || 0;
+        let startX, startY, winAnnounced = false;
+        bestDisplay.innerText = best;
+
+        function init() {
+            overlay.style.display = 'none';
+            gridDisplay.querySelectorAll('.cell').forEach(c => c.remove());
+            tiles = []; score = 0; winAnnounced = false;
+            scoreDisplay.innerText = 0;
+            for (let i = 0; i < 16; i++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                gridDisplay.appendChild(cell);
+                tiles.push(cell);
+            }
+            generate(); generate();
+        }
+
+        function generate() {
+            let empty = tiles.filter(t => t.innerHTML === "");
+            if (empty.length) {
+                let random = empty[Math.floor(Math.random() * empty.length)];
+                random.innerHTML = Math.random() > 0.1 ? 2 : 4;
+                updateStyles();
+                checkGameOver();
+            }
+        }
+
+        function updateStyles() {
+            tiles.forEach(t => {
+                let val = parseInt(t.innerHTML) || 0;
+                t.className = 'cell' + (val ? ' tile-' + val : '');
+                
+                // 2048 ve üzeri için parlama efekti
+                if (val >= 2048) t.classList.add('glow');
+                else t.classList.remove('glow');
+
+                // Kazanma kontrolü (Sadece ilk ulaştığında)
+                if (val === 2048 && !winAnnounced) {
+                    showPopup("2048'e ulaştın!", false);
+                    winAnnounced = true;
+                }
+            });
+        }
+
+        function showPopup(msg, isGameOver) {
+            statusText.innerText = msg;
+            overlay.style.display = 'flex';
+            
+            if (isGameOver) {
+                actionBtn.onclick = init; // Kaybedince baştan başla
+            } else {
+                actionBtn.onclick = () => { overlay.style.display = 'none'; }; // Kazanınca devam et
+            }
+        }
+
+        function checkGameOver() {
+            if (!tiles.filter(t => t.innerHTML === "").length) {
+                let canMove = false;
+                for (let i = 0; i < 16; i++) {
+                    let v = tiles[i].innerHTML;
+                    if ((i % 4 < 3 && tiles[i+1].innerHTML === v) || (i < 12 && tiles[i+4].innerHTML === v)) {
+                        canMove = true; break;
+                    }
+                }
+                if (!canMove) showPopup("Kaybettin!", true);
+            }
+        }
+
+        function move(dir) {
+            if (overlay.style.display === 'flex') return;
+            let moved = false;
+            for (let i = 0; i < 4; i++) {
+                let line = [];
+                for (let j = 0; j < 4; j++) {
+                    let idx = (dir === 'R' || dir === 'L') ? (i * 4 + j) : (j * 4 + i);
+                    line.push(parseInt(tiles[idx].innerHTML) || 0);
+                }
+                if (dir === 'R' || dir === 'D') line.reverse();
+                let f = line.filter(n => n);
+                for (let j = 0; j < f.length - 1; j++) {
+                    if (f[j] === f[j+1]) { f[j] *= 2; score += f[j]; f.splice(j+1, 1); }
+                }
+                while (f.length < 4) f.push(0);
+                if (dir === 'R' || dir === 'D') f.reverse();
+                for (let j = 0; j < 4; j++) {
+                    let idx = (dir === 'R' || dir === 'L') ? (i * 4 + j) : (j * 4 + i);
+                    let val = f[j] || "";
+                    if (tiles[idx].innerHTML != val) moved = true;
+                    tiles[idx].innerHTML = val;
+                }
+            }
+            if (moved) { 
+                generate(); 
+                scoreDisplay.innerText = score;
+                if (score > best) {
+                    best = score;
+                    bestDisplay.innerText = best;
+                    localStorage.setItem('bestScore2048', best);
+                }
+            }
+        }
+
+        document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
+        document.addEventListener('touchend', e => {
+            let dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
+            if (Math.abs(dx) > 25 || Math.abs(dy) > 25) {
+                if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'R' : 'L');
+                else move(dy > 0 ? 'D' : 'U');
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') move('L');
+            if (e.key === 'ArrowRight') move('R');
+            if (e.key === 'ArrowUp') move('U');
+            if (e.key === 'ArrowDown') move('D');
+        });
+
+        init();
+    </script>
+</body>
+</html>
