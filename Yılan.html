@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yılan</title>
+    <style>
+        /* Sayfa boşluklarını sıfırlıyoruz */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Kaydırma çubuklarını gizler */
+            font-family: sans-serif;
+        }
+
+        /* Üstteki buton alanı */
+        .header {
+            height: 50px;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        /* Geri Butonu Tasarımı */
+        .back-button {
+            text-decoration: none;
+            color: white;
+            background-color: #e73c;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #c92b;
+        }
+
+        /* Ekranın geri kalanını kaplayan iframe */
+        iframe {
+            width: 100%;
+            height: calc(100vh - 50px); /* Toplam yükseklikten header yüksekliğini çıkarır */
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Üst Kısım -->
+    <div class="header">
+        <a href="index.html" class="back-button">← GERİ DÖN</a>
+    </div>
+
+    <!-- Oyun Alanı -->
+    <iframe src="https://snake.io/crazygames/"></iframe>
+
+</body>
+</html>
