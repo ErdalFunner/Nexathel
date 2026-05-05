@@ -4,7 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>2048 game</title>
-    <style>
+    <style>/* Sadece fare ile tıklandığında çıkan mavi çerçeveyi yok eder */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Tüm buton ve linklerdeki varsayılan mavi gölgeyi temizler */
+button, a, input, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+}.btn-2048 {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    background: #8f7a66;
+    color: white !important;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow: 0 4px 0 #5f4e3d;
+    transition: all 0.1s;
+    z-index: 1000;
+}
+.btn-2048:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #5f4e3d;
+}
         body { background: #faf8ef; color: #776e65; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; touch-action: none; }
         .header { width: 450px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .score-box { display: flex; gap: 10px; }
@@ -40,6 +67,7 @@
     </style>
 </head>
 <body>
+       <a href="index.html" class="btn btn-2048">Geri</a> 
     <div class="header">
         <h1 style="font-size: 60px; margin: 0;">2048</h1>
         <div class="score-box">

@@ -4,7 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dinozor</title>
-    <style>
+    <style>/* Sadece fare ile tıklandığında çıkan mavi çerçeveyi yok eder */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Tüm buton ve linklerdeki varsayılan mavi gölgeyi temizler */
+button, a, input, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+}
         html, body { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -50,7 +60,7 @@
 </head>
 <body>
 
-    <a href="serbest.html" id="back-btn">Geri</a>
+    <a href="index.html" id="back-btn">Geri</a>
 
     <div id="score-container">
         <div id="score">00000</div>

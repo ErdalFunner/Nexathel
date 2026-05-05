@@ -4,7 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Stack Game Play</title>
-    <style>
+    <style>/* Sadece fare ile tıklandığında çıkan mavi çerçeveyi yok eder */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Tüm buton ve linklerdeki varsayılan mavi gölgeyi temizler */
+button, a, input, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+}.btn-baba {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 12px 25px;
+    background: #ff4757;
+    color: white !important;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+    transition: all 0.2s;
+    z-index: 1000;
+    text-transform: uppercase;
+}
+.btn-baba:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(255, 71, 87, 0.4);
+}
         body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Arial Black', sans-serif; touch-action: manipulation; }
         canvas { display: block; width: 100vw; height: 100vh; background: linear-gradient(#1e3c72, #2a5298); }
         #ui { position: absolute; top: 15%; width: 100%; text-align: center; pointer-events: none; z-index: 10; }
@@ -13,7 +41,7 @@
     </style>
 </head>
 <body>
-
+       <a href="index.html" class="btn btn-baba">Geri</a>
 <div id="ui">
     <div id="score">0</div>
     <div id="msg" class="msg">BAŞLAMAK İÇİN DOKUN</div>

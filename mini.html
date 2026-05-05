@@ -4,7 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <title>Mini Arena Savaşları</title>
-<style>
+<style>/* Sadece fare ile tıklandığında çıkan mavi çerçeveyi yok eder */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Tüm buton ve linklerdeki varsayılan mavi gölgeyi temizler */
+button, a, input, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+}
   :root{
     --bg:#070a12;
     --panel:rgba(255,255,255,.06);
@@ -186,7 +196,7 @@
 </style>
 </head>
 <body>
-<button onclick="location.href='index.html'" style="position:fixed; bottom:20px; left:20px; z-index:1000; padding:12px 20px; background:var(--b); border:1px solid var(--b); border-radius:var(--r); color:var(--m); font-weight:600; cursor:pointer; backdrop-filter:blur(5px);">Menüye Dön</button>
+<button onclick="location.href='görevler.html'" style="position:fixed; bottom:20px; left:20px; z-index:1000; padding:12px 20px; background:var(--b); border:1px solid var(--b); border-radius:var(--r); color:var(--m); font-weight:600; cursor:pointer; backdrop-filter:blur(5px);">Menüye Dön</button>
 <div class="app">
   <header>
     <div class="left">
@@ -234,7 +244,7 @@
             <div style="margin-top:8px;font-size:12px;color:var(--m)">
               • Bot sayısı <b>50</b> • AI daha agresif • Win/Lose ekranı<br>
               • Hasar/Can <b>elmas</b> ile • Elmas: <b>500 coin</b> / 1 elmas<br>
-              • Kit/Edgar ulti menzili: ulti joystickini az çek → kısa, çok çek → uzun.
+              • Ket/Edgır ulti menzili: ulti joystickini az çek → kısa, çok çek → uzun.
             </div>
           </div>
         </div>
@@ -351,17 +361,17 @@ const BOT_COUNT = 50;
 
 /* ========= Characters ========= */
 const CHARS = [
-  { id:"kit", name:"KIT", color:"#7fffd4", role:"Support",
+  { id:"ket", name:"KET", color:"#7fffd4", role:"Support",
     baseHP:3400, baseDMG:150, range:230, speed:150,
     atk:{pellets:1, spread:0.30, cooldown:0.12, bulletSpeed:590, bulletRad:6, dmgMul:1.00},
     sup:{type:"jump", range:360, radius:80, dmgMul:1.55} // range is max; joystick magnitude scales it
   },
-  { id:"edgar", name:"EDGAR", color:"#c7a6ff", role:"Assassin",
+  { id:"edgır", name:"EDGIR", color:"#c7a6ff", role:"Assassin",
     baseHP:3200, baseDMG:260, range:190, speed:165,
     atk:{pellets:1, spread:0.18, cooldown:0.18, bulletSpeed:610, bulletRad:5, dmgMul:1.00},
     sup:{type:"jump", range:420, radius:70, dmgMul:1.85}
   },
-  { id:"shelly", name:"SHELLY", color:"#ffd36e", role:"Fighter",
+  { id:"şeli", name:"ŞELİ", color:"#ffd36e", role:"Fighter",
     baseHP:3600, baseDMG:120, range:340, speed:138,
     atk:{pellets:5, spread:0.95, cooldown:0.35, bulletSpeed:560, bulletRad:6, dmgMul:0.58},
     sup:{type:"megaShot", range:460, pellets:13, spread:1.10, dmgMul:2.35, knock:210}
@@ -997,7 +1007,7 @@ function finishJump(attacker){
   }
 }
 
-/* ========= Bullets update + Shelly close damage ========= */
+/* ========= Bullets update + ŞELİ close damage ========= */
 function bulletsUpdate(dt){
   for(const p of bullets){
     p.x += p.vx*dt;
@@ -1021,9 +1031,9 @@ function bulletsUpdate(dt){
       const dx=f.x-p.x, dy=f.y-p.y;
       if(dx*dx+dy*dy <= (f.r + p.rad)*(f.r + p.rad)){
 
-        // Shelly close-range bonus on normal attack
+        // Şeli close-range bonus on normal attack
         let dmg = p.dmg;
-        if(p.owner && p.owner.charId==="shelly" && !p.super){
+        if(p.owner && p.owner.charId==="şeli" && !p.super){
           const traveledFrac = clamp((p.maxLife - p.life)/p.maxLife, 0, 1);
           // close -> bigger: 1.55 ; far -> 0.75
           const mul = 0.75 + 0.80*(1 - traveledFrac);
@@ -1159,7 +1169,7 @@ function botUpdate(b, dt){
   // keep distance by role
   const role = b.charId;
   let prefer = b.range*0.78;
-  if(role==="edgar"||role==="kit") prefer=b.range*0.60;
+  if(role==="edgır"||role==="ket") prefer=b.range*0.60;
 
   // movement: approach/retreat + strafing
   let mvx=ux, mvy=uy;

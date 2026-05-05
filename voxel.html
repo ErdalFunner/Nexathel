@@ -4,7 +4,17 @@
 <meta charset="UTF-8">
 <title>Voxel Dünya</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<style>
+<style>/* Sadece fare ile tıklandığında çıkan mavi çerçeveyi yok eder */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Tüm buton ve linklerdeki varsayılan mavi gölgeyi temizler */
+button, a, input, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+}
 body{margin:0;overflow:hidden;background:#87ceeb;touch-action:none;font-family:Arial}
 #cross{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:white;font-size:26px;z-index:10}
 #joy{position:fixed;left:20px;bottom:20px;width:120px;height:120px;background:rgba(0,0,0,.25);border-radius:50%;z-index:10}
@@ -19,7 +29,7 @@ display:flex;flex-direction:column;align-items:center;justify-content:center}
 </head>
 <body>
   
-<button onclick="window.location.href='index.html'" style="
+<button onclick="window.location.href='görevler.html'" style="
     position: fixed;
     top: 10px;
     left: 10px;

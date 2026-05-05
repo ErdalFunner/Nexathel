@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pac-Man</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .header {
+            height: 50px;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .back-button {
+            text-decoration: none;
+            color: white;
+            background-color: #ec3c;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* KIRPMA ALANI */
+        .iframe-container {
+            width: 100%;
+            height: calc(100vh - 50px);
+            overflow: hidden; /* Dışarı taşan (yukarı kayan) kısmı gizler */
+            position: relative;
+        }
+
+        iframe {
+            position: absolute;
+            left: 0;
+            /* YUKARI KAYDIRMA BURADA YAPILIYOR */
+            top: -80px; /* Bu değeri artırırsan (örn: -100px) yukarıdan daha çok keser */
+            width: 100%;
+            /* Alttan boşluk kalmaması için yüksekliği kesilen miktar kadar artırıyoruz */
+            height: calc(100% + 80px); 
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="back-button">← GERİ DÖN</a>
+    </div>
+
+    <div class="iframe-container">
+        <iframe src="https://freepacman.org/"></iframe>
+    </div>
+
+</body>
+</html>

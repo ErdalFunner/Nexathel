@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dart Ustası</title>
+    <style>/* Sadece fare ile tıklandığında çıkan mavi çerçeveyi yok eder */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Tüm buton ve linklerdeki varsayılan mavi gölgeyi temizler */
+button, a, input, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+}
+        body { margin: 0; background: #080808; overflow: hidden; font-family: 'Segoe UI', sans-serif; touch-action: none; }
+        #back-btn { position: absolute; top: 20px; right: 20px; padding: 10px 25px; background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid white; border-radius: 5px; cursor: pointer; z-index: 100; }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; }
+        #overlay h1 { color: #00ffea; font-size: 3rem; margin-bottom: 5px; }
+        #final-score { color: white; font-size: 1.8rem; margin-bottom: 30px; }
+        #next-btn, #retry-btn { padding: 15px 50px; background: #00ffea; color: #000; border: none; border-radius: 5px; font-weight: bold; font-size: 1.3rem; cursor: pointer; }
+        #ui { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 12px 25px; border-radius: 8px; border: 2px solid rgba(0, 255, 234, 0.3); font-size: 22px; font-weight: bold; color: #fff; pointer-events: none; }
+        #level-display { position: absolute; top: 20px; left: 20px; color: #00ffea; font-size: 24px; font-weight: bold; }
+        #score-popup { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); color: #00ffea; font-size: 5rem; font-weight: bold; display: none; text-shadow: 0 0 20px #00ffea; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<button id="back-btn" onclick="location.href='index.html'">GERİ</button>
+<div id="level-display">SEVİYE: 1 / 5</div>
+
+<div id="overlay">
+    <h1 id="overlay-title">BÖLÜM TAMAMLANDI!</h1>
+    <div id="final-score">TOPLAM PUAN: 0</div>
+    <button id="next-btn" onclick="nextLevel()">SONRAKİ SEVİYE</button>
+    <button id="retry-btn" style="display:none" onclick="location.reload()">TEKRAR OYNA</button>
+</div>
+
+<div id="ui">DART: <span id="darts-left">5</span> / TOPLAM: <span id="score">0</span></div>
+<div id="score-popup">+100</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    let scene, camera, renderer, boardGroup, trajectoryLine, targetDot, previewDart;
+    let isDragging = false, dartsLeft = 5, totalScore = 0, currentLevel = 1;
+    let startPoint = new THREE.Vector2(), currentPoint = new THREE.Vector2();
+    let boardDepth = -3, moveSpeed = 0;
+    const throwOriginZ = 6, handY = -1.5;
+    const segmentsCW = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+
+    init();
+    animate();
+
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0a);
+        camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 0.5, throwOriginZ + 1);
+        
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const spotLight = new THREE.SpotLight(0xffffff, 1.2);
+        spotLight.position.set(0, 5, 10);
+        scene.add(spotLight);
+
+        boardGroup = new THREE.Group();
+        boardGroup.position.z = boardDepth;
+        scene.add(boardGroup);
+
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 0.2, 50), new THREE.MeshPhongMaterial({ color: 0x050505 }));
+        body.rotation.x = Math.PI / 2;
+        boardGroup.add(body);
+
+        const wireMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });
+
+        for (let i = 0; i < 20; i++) {
+            const startAngle = (Math.PI / 2) + (Math.PI / 20) - (i * Math.PI * 2 / 20);
+            const segmentNumber = segmentsCW[i];
+            
+            let singleColor, dtColor;
+            
+            // Dart tahtasının orijinal yeşil rengi
+            const standardGreen = 0x2a8a3c;
+
+            // 20 VE 14 NUMARALI DİLİMLER KOMPLE STANDART YEŞİL
+            if (segmentNumber === 20 || segmentNumber === 14) {
+                singleColor = standardGreen; // Gövde aynı yeşil
+                dtColor = standardGreen;     // Halkalar aynı yeşil
+            } 
+            else {
+                const isOdd = i % 2 !== 0;
+                singleColor = isOdd ? 0xebd4a9 : 0x111111; // Standart Bej/Siyah
+                dtColor = isOdd ? 0xcc0000 : standardGreen; // Standart Kırmızı/Yeşil
+            }
+
+            const shape = new THREE.Shape();
+            shape.moveTo(0, 0.3);
+            shape.absarc(0, 0, 3.8, startAngle, startAngle - Math.PI/10, true);
+            const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color: singleColor }));
+            mesh.position.z = 0.1; boardGroup.add(mesh);
+            
+            boardGroup.add(createRingMesh(2.2, 2.5, startAngle, dtColor, 0.11));
+            boardGroup.add(createRingMesh(3.5, 3.8, startAngle, dtColor, 0.11));
+
+            const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 3.5, 8), wireMat);
+            wire.position.set(Math.cos(startAngle) * 2.05, Math.sin(startAngle) * 2.05, 0.13);
+            wire.rotation.z = startAngle - Math.PI/2;
+            boardGroup.add(wire);
+
+            addNumber(segmentNumber, startAngle - Math.PI/20);
+        }
+
+        [3.8, 3.5, 2.5, 2.2, 0.3].forEach(r => {
+            const ringWire = new THREE.Mesh(new THREE.TorusGeometry(r, 0.012, 8, 100), wireMat);
+            ringWire.position.z = 0.13;
+            boardGroup.add(ringWire);
+        });
+
+        boardGroup.add(createFullRing(0.1, 0.3, 0x2a8a3c, 0.12)); 
+        boardGroup.add(createFullRing(0, 0.1, 0xcc0000, 0.12));
+
+        trajectoryLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color: 0x00f2ff, dashSize: 0.15, gapSize: 0.1 }));
+        trajectoryLine.visible = false;
+        scene.add(trajectoryLine);
+
+        targetDot = new THREE.Mesh(new THREE.CircleGeometry(0.12, 32), new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
+        targetDot.visible = false;
+        scene.add(targetDot);
+
+        previewDart = createDartModel();
+        previewDart.visible = false;
+        scene.add(previewDart);
+
+        window.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+        window.addEventListener('touchstart', (e) => onStart(e.touches[0]));
+        window.addEventListener('touchmove', (e) => onMove(e.touches[0]));
+        window.addEventListener('touchend', onEnd);
+    }
+
+    function createDartModel() {
+        const group = new THREE.Group();
+        const barrelMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 1, roughness: 0.3 });
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.5, 16), barrelMat);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.z = -0.25;
+        group.add(barrel);
+
+        const tipMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8 });
+        const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.04, 0.2, 16), tipMat);
+        tip.rotation.x = Math.PI / 2;
+        tip.position.z = 0.1;
+        group.add(tip);
+
+        const shaftMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8), shaftMat);
+        shaft.rotation.x = Math.PI / 2;
+        shaft.position.z = -0.7;
+        group.add(shaft);
+
+        const flightMat = new THREE.MeshStandardMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+        for (let i = 0; i < 4; i++) {
+            const f = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 0.3), flightMat);
+            f.position.z = -0.85;
+            f.rotation.z = (Math.PI / 2) * i;
+            f.position.y = 0.12 * (i % 2 === 0 ? 0 : 1);
+            f.position.x = 0.12 * (i % 2 !== 0 ? 0 : 1);
+            group.add(f);
+        }
+        return group;
+    }
+
+    function createRingMesh(r1, r2, angle, color, z) {
+        const geo = new THREE.RingGeometry(r1, r2, 16, 1, angle, -Math.PI/10);
+        const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
+        mesh.position.z = z;
+        return mesh;
+    }
+    
+    function createFullRing(r1, r2, color, z) {
+        const mesh = new THREE.Mesh(new THREE.RingGeometry(r1, r2, 32), new THREE.MeshBasicMaterial({ color: color }));
+        mesh.position.z = z; return mesh;
+    }
+
+    function addNumber(num, angle) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64; canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "white"; ctx.font = "Bold 35px Arial"; ctx.textAlign = "center"; ctx.fillText(num, 32, 45);
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(canvas), transparent: true}));
+        plane.position.set(Math.cos(angle)*4.2, Math.sin(angle)*4.2, 0.1);
+        boardGroup.add(plane);
+    }
+
+    function onStart(e) { if (dartsLeft > 0) { isDragging = true; startPoint.set(e.clientX, e.clientY); trajectoryLine.visible = true; targetDot.visible = true; previewDart.visible = true; } }
+
+    function onMove(e) {
+        if (!isDragging) return;
+        currentPoint.set(e.clientX, e.clientY);
+        let tX = (currentPoint.x - startPoint.x) * 0.015;
+        let tY = (startPoint.y - currentPoint.y) * 0.02 + 0.8;
+        const points = [];
+        for (let i = 0; i <= 30; i++) {
+            const u = i / 30;
+            const x = tX * u;
+            const y = handY + (tY - handY) * u + Math.sin(u * Math.PI) * 1.5;
+            const z = throwOriginZ - (throwOriginZ - boardDepth) * u;
+            points.push(new THREE.Vector3(x, y, z));
+        }
+        trajectoryLine.geometry.setFromPoints(points);
+        trajectoryLine.computeLineDistances();
+        targetDot.position.set(points[30].x, points[30].y, boardDepth + 0.15);
+        previewDart.position.copy(points[0]);
+        previewDart.lookAt(points[5]);
+    }
+
+    function onEnd() {
+        if (!isDragging) return;
+        isDragging = false; trajectoryLine.visible = false; targetDot.visible = false; previewDart.visible = false;
+        dartsLeft--; document.getElementById('darts-left').innerText = dartsLeft;
+        spawnDart((currentPoint.x - startPoint.x) * 0.015, (startPoint.y - currentPoint.y) * 0.02 + 0.8);
+    }
+
+    function spawnDart(tX, tY) {
+        const dart = createDartModel();
+        scene.add(dart);
+        let u = 0;
+        const moveInt = setInterval(() => {
+            u += 0.03; if(u >= 1) u = 1;
+            const prev = dart.position.clone();
+            dart.position.x = tX * u;
+            dart.position.y = handY + (tY - handY) * u + Math.sin(u * Math.PI) * 1.5;
+            dart.position.z = throwOriginZ - (throwOriginZ - boardDepth) * u;
+            dart.lookAt(dart.position.clone().add(dart.position.clone().sub(prev)));
+            
+            if (u === 1) {
+                clearInterval(moveInt);
+                const localPos = boardGroup.worldToLocal(dart.position.clone());
+                const dist = Math.sqrt(localPos.x**2 + localPos.y**2);
+                if (dist < 3.8) {
+                    boardGroup.add(dart);
+                    dart.position.copy(localPos);
+                    dart.rotation.set(0, 0, 0); 
+                    dart.position.z = 0.2; 
+
+                    let pts = 0;
+                    if (dist < 0.1) pts = 50;
+                    else if (dist < 0.3) pts = 25;
+                    else {
+                        let angle = Math.atan2(localPos.y, localPos.x) * (180 / Math.PI);
+                        angle = (90 - angle + 360 + 9) % 360;
+                        pts = segmentsCW[Math.floor(angle / 18) % 20];
+                        if (dist > 3.5 && dist < 3.8) pts *= 2;
+                        else if (dist > 2.2 && dist < 2.5) pts *= 3;
+                    }
+                    totalScore += pts; document.getElementById('score').innerText = totalScore;
+                    showPopup(pts);
+                } else scene.remove(dart);
+                if (dartsLeft === 0) setTimeout(showLevelOverlay, 1000);
+            }
+        }, 16);
+    }
+
+    function showPopup(pts) {
+        const pop = document.getElementById('score-popup');
+        pop.innerText = "+" + pts; pop.style.display = 'block';
+        setTimeout(() => pop.style.display = 'none', 800);
+    }
+
+    function showLevelOverlay() {
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('final-score').innerText = "TOPLAM PUAN: " + totalScore;
+        if (currentLevel >= 5) {
+            document.getElementById('overlay-title').innerText = "OYUN TAMAMLANDI!";
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('retry-btn').style.display = 'block';
+        } else {
+            document.getElementById('next-btn').style.display = 'block';
+            document.getElementById('retry-btn').style.display = 'none';
+        }
+    }
+
+    function nextLevel() {
+        currentLevel++;
+        document.getElementById('level-display').innerText = "SEVİYE: " + currentLevel + " / 5";
+        document.getElementById('overlay').style.display = 'none';
+        boardDepth -= 2.5;
+        if(currentLevel >= 3) moveSpeed = (currentLevel - 2) * 0.02;
+        dartsLeft = 5; document.getElementById('darts-left').innerText = dartsLeft;
+        boardGroup.position.z = boardDepth;
+        const toRemove = [];
+        boardGroup.children.forEach(c => { if(c.type === "Group") toRemove.push(c); });
+        toRemove.forEach(c => boardGroup.remove(c));
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if (moveSpeed > 0) boardGroup.position.x = Math.sin(Date.now() * 0.002) * (currentLevel * 0.8);
+        renderer.render(scene, camera);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayın Tarlası</title>
+    <style>/* Sayfadaki her şeyin mavi çerçevesini ve tıklama gölgesini kaldırır */
+* {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Odaklanma (focus) durumunda oluşabilecek gölgeleri engeller */
+*:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Voxel ve Arena gibi .card sınıfı kullanan özel butonlar için garanti çözüm */
+.card:focus, .card:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+        :root {
+            --bg-color: #e3e9f2;
+            --cell-unopened: #b0b0b0;
+            --cell-opened: #ffffff;
+            --primary: #385dad;
+            --flag-color: #38c8a1;
+            --mine-color: #ff5e5e;
+            --grid-line: #888;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-decoration: none;
+            background: #444;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            margin-top: 40px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        select, .new-game-btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .new-game-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-weight: bold;
+            background: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        #grid {
+            display: grid;
+            gap: 1px;
+            background-color: var(--grid-line);
+            border: 4px solid #666;
+            user-select: none;
+        }
+
+        .cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background-color: var(--cell-unopened);
+        }
+
+        .cell.opened { background-color: var(--cell-opened); cursor: default; }
+        .n1 { color: #385dad; } .n2 { color: #2e7d32; } .n3 { color: #d32f2f; }
+
+        .cell.flagged::before {
+            content: ""; width: 16px; height: 16px;
+            background-color: var(--flag-color);
+            clip-path: polygon(0 0, 100% 50%, 0 100%);
+        }
+
+        .cell.mine-exploded::before {
+            content: ""; width: 22px; height: 22px;
+            background-color: var(--mine-color);
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M487.4 315.7l-42.6-24.6c2.3-10.7 3.5-21.6 3.5-32.7s-1.2-22-3.5-32.7l42.6-24.6c11.9-6.9 16-22 9.1-33.9l-32-55.4c-6.9-11.9-22-16-33.9-9.1L387.8 127c-18.7-16.1-40.4-28.7-64-37l-6.5-49c-1.8-13.6-13.4-23.7-27.1-23.7h-64c-13.7 0-25.3 10.1-27.1 23.7l-6.5 49c-23.6 8.3-45.3 20.9-64 37l-42.6-24.6c-11.9-6.9-27-2.8-33.9 9.1l-32 55.4c-6.9 11.9-2.8 27 9.1 33.9l42.6 24.6c-2.3 10.7-3.5 21.6-3.5 32.7s1.2 22 3.5 32.7l-42.6 24.6c-11.9 6.9-16 22-9.1 33.9l32 55.4c6.9 11.9 22 16 33.9 9.1l42.6-24.6c18.7 16.1 40.4 28.7 64 37l6.5 49c1.8 13.6 13.4 23.7 27.1-23.7h64c13.7 0 25.3 10.1 27.1 23.7l6.5-49c23.6-8.3 45.3-20.9 64-37l42.6 24.6c11.9 6.9 27 2.8 33.9-9.1l32-55.4c6.9-11.9 2.8-27-9.1-33.9zM256 336c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z"/></svg>') no-repeat center;
+            mask-size: contain;
+        }
+
+        .leaderboard {
+            margin-top: 30px; background: white; padding: 15px; border-radius: 15px;
+            width: 100%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        #modal { background: white; padding: 30px; border-radius: 20px; text-align: center; }
+        #modal input { padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; width: 80%; }
+    </style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn">Geri</a>
+
+<div class="header-container">
+    <div class="controls">
+        <select id="mode-select">
+            <option value="easy">Kolay (9x9)</option>
+            <option value="medium">Orta (16x16)</option>
+            <option value="hard" selected>Zor (20x20)</option>
+        </select>
+        <button class="new-game-btn" onclick="initGame()">Yeni Oyun</button>
+    </div>
+    <div class="stats">
+        <div>🚩 <span id="mine-count">0</span></div>
+        <div>⏱️ <span id="timer">0</span>s</div>
+    </div>
+</div>
+
+<div id="grid"></div>
+
+<div class="leaderboard">
+    <h3 style="margin:0 0 10px 0; text-align:center;">🏆 Skorlar</h3>
+    <div id="leader-list" style="font-size: 0.9rem;">Kayıt yok...</div>
+</div>
+
+<div id="modal-overlay">
+    <div id="modal">
+        <h2 id="modal-title">Oyun Bitti!</h2>
+        <p id="modal-desc"></p>
+        <div id="name-input-area" style="display:none">
+            <input type="text" id="nickname" placeholder="Adınızı yazın..." maxlength="12">
+        </div>
+        <br>
+        <button class="new-game-btn" onclick="handleModalAction()">Kapat</button>
+    </div>
+</div>
+
+<script>
+    let grid = document.getElementById('grid'), cells = [], mines = [], revealedCount = 0;
+    let flaggedCount = 0, gameOver = false, timerInterval, firstClick = true, currentSeconds = 0;
+    
+    const modes = {
+        easy: { rows: 9, cols: 9, mines: 10, label: "Kolay" },
+        medium: { rows: 16, cols: 16, mines: 40, label: "Orta" },
+        hard: { rows: 20, cols: 20, mines: 50, label: "Zor" }
+    };
+
+    let activeConfig = modes.hard;
+
+    function initGame() {
+        const modeKey = document.getElementById('mode-select').value;
+        activeConfig = modes[modeKey];
+
+        grid.innerHTML = '';
+        grid.style.gridTemplateColumns = `repeat(${activeConfig.cols}, 30px)`;
+        cells = []; mines = []; revealedCount = 0; flaggedCount = 0; 
+        gameOver = false; firstClick = true; currentSeconds = 0;
+        clearInterval(timerInterval);
+        document.getElementById('timer').innerText = '0';
+        document.getElementById('mine-count').innerText = activeConfig.mines;
+        updateLeaderboard();
+
+        for (let i = 0; i < activeConfig.rows * activeConfig.cols; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.onclick = () => handleCellClick(i);
+            cell.oncontextmenu = (e) => { e.preventDefault(); toggleFlag(i); };
+            grid.appendChild(cell);
+            cells.push({ el: cell, mine: false, opened: false, flagged: false });
+        }
+    }
+
+    function handleCellClick(idx) {
+        if (gameOver || cells[idx].flagged) return;
+        if (firstClick) {
+            firstClick = false;
+            generateMines(idx);
+            startTimer();
+        }
+        reveal(idx);
+    }
+
+    function generateMines(safeIdx) {
+        let safeZone = getNeighbors(safeIdx);
+        safeZone.push(safeIdx);
+        let placed = 0;
+        while (placed < activeConfig.mines) {
+            let idx = Math.floor(Math.random() * cells.length);
+            if (!cells[idx].mine && !safeZone.includes(idx)) {
+                cells[idx].mine = true; mines.push(idx); placed++;
+            }
+        }
+    }
+
+    function reveal(idx) {
+        if (gameOver || cells[idx].opened || cells[idx].flagged) return;
+        cells[idx].opened = true;
+        cells[idx].el.classList.add('opened');
+        if (cells[idx].mine) { endGame(false, idx); return; }
+
+        let near = 0;
+        const neighbors = getNeighbors(idx);
+        neighbors.forEach(n => { if (cells[n].mine) near++; });
+
+        if (near > 0) {
+            cells[idx].el.innerText = near;
+            cells[idx].el.classList.add(`n${near}`);
+        } else {
+            neighbors.forEach(n => reveal(n));
+        }
+        revealedCount++;
+        if (revealedCount === cells.length - mines.length) endGame(true);
+    }
+
+    function toggleFlag(idx) {
+        if (gameOver || cells[idx].opened) return;
+        cells[idx].flagged = !cells[idx].flagged;
+        cells[idx].el.classList.toggle('flagged');
+        flaggedCount += cells[idx].flagged ? 1 : -1;
+        document.getElementById('mine-count').innerText = Math.max(0, activeConfig.mines - flaggedCount);
+    }
+
+    function getNeighbors(idx) {
+        let n = [], r = Math.floor(idx / activeConfig.cols), c = idx % activeConfig.cols;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                let nr = r + i, nc = c + j;
+                if (nr >= 0 && nr < activeConfig.rows && nc >= 0 && nc < activeConfig.cols && !(i===0 && j===0))
+                    n.push(nr * activeConfig.cols + nc);
+            }
+        }
+        return n;
+    }
+
+    function endGame(win, explodedIdx) {
+        gameOver = true; clearInterval(timerInterval);
+        mines.forEach(m => {
+            if (m === explodedIdx) cells[m].el.classList.add('mine-exploded');
+            else cells[m].el.innerText = '💣';
+        });
+        document.getElementById('modal-title').innerText = win ? "Kazandın! 🏆" : "Kaybettin!";
+        document.getElementById('modal-desc').innerText = win ? `Mod: ${activeConfig.label} | Süre: ${currentSeconds}s` : "Mayına bastın!";
+        document.getElementById('name-input-area').style.display = win ? 'block' : 'none';
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function handleModalAction() {
+        if (document.getElementById('name-input-area').style.display === 'block') {
+            const nick = document.getElementById('nickname').value || "İsimsiz";
+            saveScore(nick, currentSeconds, activeConfig.label);
+        }
+        closeModal();
+        initGame();
+    }
+
+    function saveScore(name, time, mode) {
+        let scores = JSON.parse(localStorage.getItem('mines_multi_scores') || '[]');
+        scores.push({ name, time, mode });
+        scores.sort((a, b) => a.time - b.time); // Saniyeye göre sırala
+        localStorage.setItem('mines_multi_scores', JSON.stringify(scores.slice(0, 10)));
+        updateLeaderboard();
+    }
+
+    function updateLeaderboard() {
+        let scores = JSON.parse(localStorage.getItem('mines_multi_scores') || '[]');
+        const list = document.getElementById('leader-list');
+        if (scores.length === 0) { list.innerHTML = "<div style='text-align:center'>Henüz kayıt yok.</div>"; return; }
+        
+        list.innerHTML = scores.map((s, i) => `
+            <div style="display:flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 4px 0;">
+                <span>${i+1}. <b>${s.name}</b></span>
+                <span style="color:#666; font-size:0.8rem;">[${s.mode}]</span>
+                <span style="font-weight:bold">${s.time}s</span>
+            </div>
+        `).join('');
+    }
+
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('nickname').value = ''; }
+    function startTimer() { timerInterval = setInterval(() => { currentSeconds++; document.getElementById('timer').innerText = currentSeconds; }, 1000); }
+
+    initGame();
+</script>
+</body>
+</html>
