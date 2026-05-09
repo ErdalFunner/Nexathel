@@ -19,35 +19,37 @@
             align-items: center;
             min-height: 100vh;
             color: white;
+            padding: 20px;
         }
 
         .main-container {
-            width: 95%;
-            max-width: 1000px;
+            width: 100%;
+            max-width: 1200px;
             background: #1a1a1a; 
-            padding: 40px;
-            border-radius: 30px;
+            padding: 50px 30px;
+            border-radius: 40px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
         }
 
         h1.brand {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin-bottom: 10px;
             color: #fff;
-            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+            text-shadow: 0 0 25px rgba(255,255,255,0.3);
         }
 
         h2.subtitle {
             font-weight: 300;
-            margin-bottom: 40px;
+            font-size: 1.8rem;
+            margin-bottom: 50px;
             color: #bbb;
         }
 
         .game-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr); 
-            gap: 25px;
+            gap: 30px;
         }
 
         @media (orientation: landscape) {
@@ -58,52 +60,52 @@
 
         .game-card {
             background: #252525;
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 25px;
+            padding: 35px 20px;
             text-decoration: none;
             color: white;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            border: 1px solid #333;
+            border: 2px solid #333;
         }
 
         .game-card:hover {
-            transform: scale(1.08); 
-            background: #333;
-            box-shadow: 0 0 30px rgba(255,255,255,0.15); 
-            border-color: #555;
+            transform: scale(1.05); 
+            background: #2d2d2d;
+            box-shadow: 0 0 40px rgba(255,255,255,0.1); 
+            border-color: #666;
         }
 
         .game-card img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 15px;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
             object-fit: contain;
         }
 
         .game-card span {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.4rem;
+            font-weight: 700;
         }
 
         .footer-btn {
             display: inline-block;
             text-decoration: none;
-            margin-top: 40px;
-            padding: 12px 40px;
+            margin-top: 60px;
+            padding: 15px 60px;
             background: #d40d12;
             color: white;
-            border: none;
             border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: opacity 0.2s;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.3s;
         }
 
         .footer-btn:hover {
-            opacity: 0.8;
+            background: #f00;
+            transform: translateY(-3px);
         }
     </style>
 </head>
@@ -159,10 +161,19 @@
             <span>Mayın Tarlası</span>
         </a>
 
-        <!-- Yeni Eklenen: Pac-Man -->
         <a href="pac-man.html" class="game-card">
             <img src="pac-man.png" alt="Pac-Man">
             <span>Pac-Man</span>
+        </a>
+
+        <a href="crazymotorcyle.html" class="game-card">
+            <img src="motor.png" alt="Crazy Motorcyle">
+            <span>Crazy Motorcyle</span>
+        </a>
+
+        <a href="stickman_peacekeeper.html" class="game-card">
+            <img src="çubuk.png" alt="Stickman Savaş">
+            <span>Stickman Savaş</span>
         </a>
     </div>
 

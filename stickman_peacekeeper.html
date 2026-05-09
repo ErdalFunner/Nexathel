@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stickman Peacekeeper</title>
+    <!-- YouTube ikonu için FontAwesome kütüphanesini ekliyoruz -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Üst Bar */
+        .header {
+            height: 50px;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 10;
+        }
+
+        .back-button {
+            text-decoration: none;
+            color: white;
+            background-color: #e74c3c;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* Oyun Alanı (Altı kesilmiş) */
+        .iframe-container {
+            width: 100%;
+            /* 50px üst bar + 60px alt bar = 110px. 
+               Kırpmak istediğin miktarı buradaki 110'u artırarak ayarlayabilirsin */
+            height: calc(100vh - 110px); 
+            overflow: hidden;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100vh; /* Iframe tam boy kalsın ki kutu onu kessin */
+            border: none;
+        }
+
+        /* Alt Bar (YouTube Alanı) */
+        .footer {
+            height: 60px;
+            background-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Ortalar */
+        }
+
+        .youtube-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            color: white;
+            background-color: #ff0000; /* YouTube Kırmızısı */
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .youtube-link:hover {
+            transform: scale(1.05);
+            background-color: #cc0000;
+        }
+
+        .youtube-link i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Üst Bar -->
+    <div class="header">
+        <a href="index.html" class="back-button">← GERİ DÖN</a>
+    </div>
+
+    <!-- Oyun Alanı -->
+    <div class="iframe-container">
+        <iframe src="https://www.miniplay.com/game/stickman-peacekeeper/play"></iframe>
+    </div>
+
+    <!-- Alt Bar (YouTube) -->
+    <div class="footer">
+        <a href="https://m.youtube.com/channel/UCeNtqm2o1s8uZ0rPIc4Syew" target="_blank" class="youtube-link">
+            <i class="fab fa-youtube"></i>
+            ABONE OL
+        </a>
+    </div>
+
+</body>
+</html>
