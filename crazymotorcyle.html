@@ -3,75 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crazy Motorcycle Fix</title>
+    <title>Ultimate WebView Shield</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; }
-        
-        .container {
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; position: fixed; width: 100%; }
+
+        /* Ana Kapsayıcı */
+        .app-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
+            width: 100vw;
         }
 
-        .header { height: 50px; background: #333; z-index: 10; }
+        .header { height: 50px; background: #333; z-index: 99999; position: relative; }
 
-        .iframe-wrapper {
+        /* İframe'i hapseden bölge */
+        .game-area {
             position: relative;
             flex-grow: 1;
-            width: 100%;
+            overflow: hidden;
+            /* WebView'in 'video' algısını bozmak için hafif bir ölçeklendirme */
+            transform: translateZ(0); 
         }
 
-        /* STRATEJİK KATMAN: Tam Ekranı Engelleyen Shield */
-        .blocker-shield {
+        /* FELÇ EDEN ZIRH (Gelişmiş Versiyon) */
+        .shield-layer {
             position: absolute;
-            /* Oyun sitesindeki tam ekran butonu genelde sağ alt veya orta alt kısımdadır. 
-               Bu alanı komple 'tıklanamaz' yapıyoruz. */
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 120px; /* Bu yüksekliği oyunun 'play' butonuna göre ayarla */
-            z-index: 9999;
-            background: rgba(255, 0, 0, 0); /* Görünmez ama orada */
-            pointer-events: auto; /* Tıklamayı burada hapseder */
+            height: 100px; /* Alttaki 100px'i tamamen kilitler */
+            background: rgba(255, 0, 0, 0); /* Tam şeffaf */
+            z-index: 2147483647; /* Maksimum öncelik */
+            pointer-events: auto !important; /* Tıklamaları asla iframe'e geçirmez */
+            touch-action: none; /* Kaydırma hareketlerini durdurur */
         }
 
         iframe {
             width: 100%;
-            height: 100%;
+            height: 100.5%; /* Küçük bir taşma yaparak WebView kenar algısını bozar */
             border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
-        .footer { height: 60px; background: #222; z-index: 10; }
+        .footer { height: 60px; background: #222; z-index: 99999; position: relative; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header"></div>
+<div class="app-container">
+    <div class="header">
+        <button style="margin: 10px; padding: 5px 15px;">GERİ</button>
+    </div>
 
-    <div class="iframe-wrapper">
-        <!-- Bu katman iframe'in önünde bir duvar gibi durur -->
-        <div class="blocker-shield"></div>
+    <div class="game-area">
+        <!-- ZIRH: iframe'in içindeki tam ekran tetikleyicisi bu bölgedeyse asla tıklanamaz -->
+        <div class="shield-layer" id="shield"></div>
 
         <iframe 
-            src="https://www.miniplay.com/game/crazy-motorcycle/play"
-            /* Sandbox'ı daha da daraltıyoruz */
+            id="game-frame"
+            src="https://www.miniplay.com/game/crazy-motorcycle/play" 
+            /* allowfullscreen YOK - WebView'e tam ekran izni verilmiyor */
             sandbox="allow-scripts allow-same-origin allow-forms"
-            /* Kesinlikle tam ekrana izin verme */
             scrolling="no">
         </iframe>
     </div>
 
-    <div class="footer"></div>
+    <div class="footer">
+        <button style="background: red; color: white; border: none; padding: 10px; border-radius: 20px;">ABONE OL</button>
+    </div>
 </div>
 
 <script>
-    // Bazı WebView'ler dokunmatik hareketleri zorla tam ekrana çevirir.
-    // Bunu engellemek için iframe üzerindeki 'touchstart' olayını dinleyebiliriz.
-    document.querySelector('.blocker-shield').addEventListener('touchstart', function(e) {
-        // Tıklamanın iframe'e geçmesini burada durduruyoruz
-        console.log("Tam ekran butonu alanı koruma altında.");
-    }, { passive: false });
+    // WebView'in dokunma ile tam ekranı tetiklemesini engellemek için shield'ı sertleştiriyoruz
+    const shield = document.getElementById('shield');
+    
+    ['touchstart', 'touchend', 'click', 'mousedown'].forEach(evt => {
+        shield.addEventListener(evt, function(e) {
+            e.stopPropagation(); // Tıklamanın aşağı (iframe'e) inmesini durdur
+            console.log('Zırh çalışıyor: Tıklama engellendi.');
+        }, { passive: false });
+    });
+
+    // Bazı inatçı WebView'ler için iframe'in boyutunu sürekli kontrol et
+    window.addEventListener('resize', () => {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(err => {});
+        }
+    });
 </script>
 
 </body>
