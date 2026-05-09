@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>lumberjack</title>
+    <title>Lumberjack</title>
     <style>
-        /* Sayfa boşluklarını sıfırlıyoruz */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden; /* Kaydırma çubuklarını gizler */
+            overflow: hidden;
             font-family: sans-serif;
         }
-
-        /* Üstteki buton alanı */
         .header {
             height: 50px;
             background-color: #333;
@@ -22,8 +19,6 @@
             align-items: center;
             padding: 0 20px;
         }
-
-        /* Geri Butonu Tasarımı */
         .back-button {
             text-decoration: none;
             color: white;
@@ -33,28 +28,24 @@
             font-weight: bold;
             transition: background 0.3s;
         }
-
         .back-button:hover {
-            background-color: #6e6b;
+            background-color: #c0392b;
         }
-
-        /* Ekranın geri kalanını kaplayan iframe */
         iframe {
             width: 100%;
-            height: calc(100vh - 50px); /* Toplam yükseklikten header yüksekliğini çıkarır */
+            height: calc(100vh - 50px);
             border: none;
         }
     </style>
 </head>
 <body>
-
-    <!-- Üst Kısım -->
     <div class="header">
         <a href="index.html" class="back-button">← GERİ DÖN</a>
     </div>
-
-    <!-- Oyun Alanı -->
-    <iframe src="https://tbot.xyz/lumber/"></iframe>
-
+    <iframe 
+        src="https://tbot.xyz/lumber/" 
+        sandbox="allow-scripts allow-same-origin allow-forms"
+        allow="autoplay; fullscreen">
+    </iframe>
 </body>
 </html>
