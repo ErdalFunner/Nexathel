@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stickman Peacekeeper</title>
+    <title>Nexathel | Crazy Motorcycle</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body, html {
@@ -15,7 +15,6 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Üst Bar */
         .header {
             height: 50px;
             background-color: #333;
@@ -34,21 +33,25 @@
             font-weight: bold;
         }
 
-        /* Oyun Alanı (Altı kesilmiş) */
+        /* OYUNU KIRPMA ALANI */
         .iframe-container {
             width: 100%;
-            height: calc(100vh - 110px); 
-            overflow: hidden;
+            height: calc(100vh - 110px); /* Üst ve Alt bar farkı */
+            overflow: hidden; /* Dışarı taşan butonları gizler */
             position: relative;
         }
 
         iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 100vh;
+            /* Yüksekliği oyunun gerçek boyundan biraz fazla veriyoruz */
+            /* Böylece alt kısımdaki logolar iFrame konteynırının dışına taşıp gizleniyor */
+            height: 110%; 
             border: none;
         }
 
-        /* Alt Bar (YouTube Alanı) */
         .footer {
             height: 60px;
             background-color: #222;
@@ -66,12 +69,6 @@
             padding: 10px 20px;
             border-radius: 50px;
             font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        .youtube-link:hover {
-            transform: scale(1.05);
-            background-color: #cc0000;
         }
 
         .youtube-link i {
