@@ -2,82 +2,38 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stickman Peacekeeper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <titleStickman Peacekeeper</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
-            font-family: Arial, sans-serif;
-        }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; }
 
-        /* Üst Bar */
-        .header {
-            height: 50px;
-            background-color: #333;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            z-index: 10;
-        }
+        .header { height: 50px; background-color: #333; display: flex; align-items: center; padding: 0 15px; z-index: 1000; position: relative; }
+        .back-button { text-decoration: none; color: white; background-color: #e74c3c; padding: 8px 15px; border-radius: 5px; font-weight: bold; }
 
-        .back-button {
-            text-decoration: none;
-            color: white;
-            background-color: #e74c3c;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        /* Oyun Alanı (Altı kesilmiş) */
         .iframe-container {
             width: 100%;
-            height: calc(100vh - 110px); 
-            overflow: hidden;
+            height: calc(100vh - 110px);
             position: relative;
+            overflow: hidden;
         }
 
-        iframe {
-            width: 100%;
-            height: 100vh;
-            border: none;
+        /* ALT TARAFI KOMPLE FELÇ EDEN KATMAN */
+        .full-bottom-shield {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;    /* Ekranı boydan boya kaplar */
+            height: 90px;   /* Alt taraftaki 90 piksellik alanı tamamen kapatır */
+            z-index: 999999; 
+            background: transparent; /* Burayı görmek istersen 'rgba(255,0,0,0.3)' yapabilirsin */
+            pointer-events: auto; /* Tıklamaları yakalar ve iFrame'e geçirmez */
         }
 
-        /* Alt Bar (YouTube Alanı) */
-        .footer {
-            height: 60px;
-            background-color: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        .youtube-link {
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            color: white;
-            background-color: #ff0000;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        .youtube-link:hover {
-            transform: scale(1.05);
-            background-color: #cc0000;
-        }
-
-        .youtube-link i {
-            font-size: 24px;
-            margin-right: 10px;
-        }
+        .footer { height: 60px; background-color: #222; display: flex; align-items: center; justify-content: center; z-index: 1000; position: relative; }
+        .youtube-link { text-decoration: none; display: flex; align-items: center; color: white; background-color: #ff0000; padding: 10px 20px; border-radius: 50px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -87,6 +43,8 @@
     </div>
 
     <div class="iframe-container">
+        <div class="full-bottom-shield"></div>
+
         <iframe 
             src="https://www.miniplay.com/game/stickman-peacekeeper/play" 
             sandbox="allow-scripts allow-same-origin allow-forms"
@@ -96,8 +54,7 @@
 
     <div class="footer">
         <a href="https://m.youtube.com/channel/UCeNtqm2o1s8uZ0rPIc4Syew" target="_blank" class="youtube-link">
-            <i class="fab fa-youtube"></i>
-            ABONE OL
+            <i class="fab fa-youtube"></i> ABONE OL
         </a>
     </div>
 

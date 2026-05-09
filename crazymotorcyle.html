@@ -2,79 +2,38 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexathel | Crazy Motorcycle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crazy Motorcycle</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
-            font-family: Arial, sans-serif;
-        }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; }
 
-        .header {
-            height: 50px;
-            background-color: #333;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            z-index: 10;
-        }
+        .header { height: 50px; background-color: #333; display: flex; align-items: center; padding: 0 15px; z-index: 1000; position: relative; }
+        .back-button { text-decoration: none; color: white; background-color: #e74c3c; padding: 8px 15px; border-radius: 5px; font-weight: bold; }
 
-        .back-button {
-            text-decoration: none;
-            color: white;
-            background-color: #e74c3c;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        /* OYUNU KIRPMA ALANI */
         .iframe-container {
             width: 100%;
-            height: calc(100vh - 110px); /* Üst ve Alt bar farkı */
-            overflow: hidden; /* Dışarı taşan butonları gizler */
+            height: calc(100vh - 110px);
             position: relative;
+            overflow: hidden;
         }
 
-        iframe {
+        /* ALT TARAFI KOMPLE FELÇ EDEN KATMAN */
+        .full-bottom-shield {
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
-            width: 100%;
-            /* Yüksekliği oyunun gerçek boyundan biraz fazla veriyoruz */
-            /* Böylece alt kısımdaki logolar iFrame konteynırının dışına taşıp gizleniyor */
-            height: 110%; 
-            border: none;
+            width: 100%;    /* Ekranı boydan boya kaplar */
+            height: 90px;   /* Alt taraftaki 90 piksellik alanı tamamen kapatır */
+            z-index: 999999; 
+            background: transparent; /* Burayı görmek istersen 'rgba(255,0,0,0.3)' yapabilirsin */
+            pointer-events: auto; /* Tıklamaları yakalar ve iFrame'e geçirmez */
         }
 
-        .footer {
-            height: 60px;
-            background-color: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        .youtube-link {
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            color: white;
-            background-color: #ff0000;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-        }
-
-        .youtube-link i {
-            font-size: 24px;
-            margin-right: 10px;
-        }
+        .footer { height: 60px; background-color: #222; display: flex; align-items: center; justify-content: center; z-index: 1000; position: relative; }
+        .youtube-link { text-decoration: none; display: flex; align-items: center; color: white; background-color: #ff0000; padding: 10px 20px; border-radius: 50px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -84,6 +43,8 @@
     </div>
 
     <div class="iframe-container">
+        <div class="full-bottom-shield"></div>
+
         <iframe 
             src="https://www.miniplay.com/game/crazy-motorcycle/play" 
             sandbox="allow-scripts allow-same-origin allow-forms"
@@ -93,8 +54,7 @@
 
     <div class="footer">
         <a href="https://m.youtube.com/channel/UCeNtqm2o1s8uZ0rPIc4Syew" target="_blank" class="youtube-link">
-            <i class="fab fa-youtube"></i>
-            ABONE OL
+            <i class="fab fa-youtube"></i> ABONE OL
         </a>
     </div>
 
