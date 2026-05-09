@@ -3,97 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate WebView Shield</title>
+    <title>Crazy Motorcycle - Shield Protection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; position: fixed; width: 100%; }
-
-        /* Ana Kapsayıcı */
-        .app-container {
+        /* Kaydırmayı engelle ve ekranı sabitle */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            width: 100%; 
+            overflow: hidden; 
+            background-color: #000; 
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            width: 100vw;
         }
 
-        .header { height: 50px; background: #333; z-index: 99999; position: relative; }
+        /* Üst Menü */
+        .header { 
+            height: 50px; 
+            background-color: #333; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 15px; 
+            z-index: 1000;
+        }
+        
+        .back-button { 
+            text-decoration: none; 
+            color: white; 
+            background-color: #e74c3c; 
+            padding: 8px 15px; 
+            border-radius: 5px; 
+            font-weight: bold; 
+        }
 
-        /* İframe'i hapseden bölge */
-        .game-area {
+        /* Oyun Alanı Kapsayıcısı */
+        .iframe-container {
+            flex-grow: 1; /* Header ve Footer dışında kalan tüm alanı kapla */
             position: relative;
-            flex-grow: 1;
+            width: 100%;
             overflow: hidden;
-            /* WebView'in 'video' algısını bozmak için hafif bir ölçeklendirme */
-            transform: translateZ(0); 
+            background: #000;
         }
 
-        /* FELÇ EDEN ZIRH (Gelişmiş Versiyon) */
-        .shield-layer {
+        /* FELÇ EDEN KATMAN (SHIELD) */
+        /* Bu katman iframe'in önünde durur ve tıklamaları engeller */
+        .full-bottom-shield {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 100px; /* Alttaki 100px'i tamamen kilitler */
-            background: rgba(255, 0, 0, 0); /* Tam şeffaf */
-            z-index: 2147483647; /* Maksimum öncelik */
-            pointer-events: auto !important; /* Tıklamaları asla iframe'e geçirmez */
-            touch-action: none; /* Kaydırma hareketlerini durdurur */
+            height: 90px; /* Alttaki 90px'lik alan */
+            z-index: 999999; 
+            background: transparent; /* Kontrol için 'rgba(255,0,0,0.3)' yapabilirsiniz */
+            pointer-events: auto; /* Tıklamaları yakalar, iframe'e geçirmez */
         }
 
-        iframe {
-            width: 100%;
-            height: 100.5%; /* Küçük bir taşma yaparak WebView kenar algısını bozar */
-            border: none;
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* iFrame: allowfullscreen parametresi EKLEMEDİK */
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
         }
 
-        .footer { height: 60px; background: #222; z-index: 99999; position: relative; }
+        /* Alt Menü */
+        .footer { 
+            height: 60px; 
+            background-color: #222; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000;
+        }
+        
+        .youtube-link { 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            color: white; 
+            background-color: #ff0000; 
+            padding: 10px 20px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+        }
     </style>
 </head>
 <body>
 
-<div class="app-container">
     <div class="header">
-        <button style="margin: 10px; padding: 5px 15px;">GERİ</button>
+        <a href="index.html" class="back-button">← GERİ DÖN</a>
     </div>
 
-    <div class="game-area">
-        <!-- ZIRH: iframe'in içindeki tam ekran tetikleyicisi bu bölgedeyse asla tıklanamaz -->
-        <div class="shield-layer" id="shield"></div>
+    <div class="iframe-container">
+        <!-- Shield katmanı iframe'in üzerinde olduğu için alt kısım 'felç' olur -->
+        <div class="full-bottom-shield"></div>
 
+        <!-- 
+          ÖNEMLİ: 
+          1. 'allowfullscreen' özelliğini sildik.
+          2. sandbox içine 'allow-presentation' eklemedik.
+          Bu sayede WebView tam ekran isteğini reddeder.
+        -->
         <iframe 
-            id="game-frame"
             src="https://www.miniplay.com/game/crazy-motorcycle/play" 
-            /* allowfullscreen YOK - WebView'e tam ekran izni verilmiyor */
             sandbox="allow-scripts allow-same-origin allow-forms"
-            scrolling="no">
+            allow="autoplay">
         </iframe>
     </div>
 
     <div class="footer">
-        <button style="background: red; color: white; border: none; padding: 10px; border-radius: 20px;">ABONE OL</button>
+        <a href="https://m.youtube.com/channel/UCeNtqm2o1s8uZ0rPIc4Syew" target="_blank" class="youtube-link">
+            <i class="fab fa-youtube"></i> ABONE OL
+        </a>
     </div>
-</div>
-
-<script>
-    // WebView'in dokunma ile tam ekranı tetiklemesini engellemek için shield'ı sertleştiriyoruz
-    const shield = document.getElementById('shield');
-    
-    ['touchstart', 'touchend', 'click', 'mousedown'].forEach(evt => {
-        shield.addEventListener(evt, function(e) {
-            e.stopPropagation(); // Tıklamanın aşağı (iframe'e) inmesini durdur
-            console.log('Zırh çalışıyor: Tıklama engellendi.');
-        }, { passive: false });
-    });
-
-    // Bazı inatçı WebView'ler için iframe'in boyutunu sürekli kontrol et
-    window.addEventListener('resize', () => {
-        if (document.fullscreenElement) {
-            document.exitFullscreen().catch(err => {});
-        }
-    });
-</script>
 
 </body>
 </html>
