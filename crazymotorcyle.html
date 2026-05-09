@@ -3,119 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crazy Motorcycle - Shield Protection</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Crazy Motorcycle Fix</title>
     <style>
-        /* Kaydırmayı engelle ve ekranı sabitle */
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            width: 100%; 
-            overflow: hidden; 
-            background-color: #000; 
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; }
+        
+        .container {
             display: flex;
             flex-direction: column;
+            height: 100vh;
         }
 
-        /* Üst Menü */
-        .header { 
-            height: 50px; 
-            background-color: #333; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 15px; 
-            z-index: 1000;
-        }
-        
-        .back-button { 
-            text-decoration: none; 
-            color: white; 
-            background-color: #e74c3c; 
-            padding: 8px 15px; 
-            border-radius: 5px; 
-            font-weight: bold; 
-        }
+        .header { height: 50px; background: #333; z-index: 10; }
 
-        /* Oyun Alanı Kapsayıcısı */
-        .iframe-container {
-            flex-grow: 1; /* Header ve Footer dışında kalan tüm alanı kapla */
+        .iframe-wrapper {
             position: relative;
+            flex-grow: 1;
             width: 100%;
-            overflow: hidden;
-            background: #000;
         }
 
-        /* FELÇ EDEN KATMAN (SHIELD) */
-        /* Bu katman iframe'in önünde durur ve tıklamaları engeller */
-        .full-bottom-shield {
+        /* STRATEJİK KATMAN: Tam Ekranı Engelleyen Shield */
+        .blocker-shield {
             position: absolute;
+            /* Oyun sitesindeki tam ekran butonu genelde sağ alt veya orta alt kısımdadır. 
+               Bu alanı komple 'tıklanamaz' yapıyoruz. */
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 90px; /* Alttaki 90px'lik alan */
-            z-index: 999999; 
-            background: transparent; /* Kontrol için 'rgba(255,0,0,0.3)' yapabilirsiniz */
-            pointer-events: auto; /* Tıklamaları yakalar, iframe'e geçirmez */
+            height: 120px; /* Bu yüksekliği oyunun 'play' butonuna göre ayarla */
+            z-index: 9999;
+            background: rgba(255, 0, 0, 0); /* Görünmez ama orada */
+            pointer-events: auto; /* Tıklamayı burada hapseder */
         }
 
-        /* iFrame: allowfullscreen parametresi EKLEMEDİK */
-        iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
-        /* Alt Menü */
-        .footer { 
-            height: 60px; 
-            background-color: #222; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 1000;
-        }
-        
-        .youtube-link { 
-            text-decoration: none; 
-            display: flex; 
-            align-items: center; 
-            color: white; 
-            background-color: #ff0000; 
-            padding: 10px 20px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-        }
+        .footer { height: 60px; background: #222; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <a href="index.html" class="back-button">← GERİ DÖN</a>
-    </div>
+<div class="container">
+    <div class="header"></div>
 
-    <div class="iframe-container">
-        <!-- Shield katmanı iframe'in üzerinde olduğu için alt kısım 'felç' olur -->
-        <div class="full-bottom-shield"></div>
+    <div class="iframe-wrapper">
+        <!-- Bu katman iframe'in önünde bir duvar gibi durur -->
+        <div class="blocker-shield"></div>
 
-        <!-- 
-          ÖNEMLİ: 
-          1. 'allowfullscreen' özelliğini sildik.
-          2. sandbox içine 'allow-presentation' eklemedik.
-          Bu sayede WebView tam ekran isteğini reddeder.
-        -->
         <iframe 
-            src="https://www.miniplay.com/game/crazy-motorcycle/play" 
+            src="https://www.miniplay.com/game/crazy-motorcycle/play"
+            /* Sandbox'ı daha da daraltıyoruz */
             sandbox="allow-scripts allow-same-origin allow-forms"
-            allow="autoplay">
+            /* Kesinlikle tam ekrana izin verme */
+            scrolling="no">
         </iframe>
     </div>
 
-    <div class="footer">
-        <a href="https://m.youtube.com/channel/UCeNtqm2o1s8uZ0rPIc4Syew" target="_blank" class="youtube-link">
-            <i class="fab fa-youtube"></i> ABONE OL
-        </a>
-    </div>
+    <div class="footer"></div>
+</div>
+
+<script>
+    // Bazı WebView'ler dokunmatik hareketleri zorla tam ekrana çevirir.
+    // Bunu engellemek için iframe üzerindeki 'touchstart' olayını dinleyebiliriz.
+    document.querySelector('.blocker-shield').addEventListener('touchstart', function(e) {
+        // Tıklamanın iframe'e geçmesini burada durduruyoruz
+        console.log("Tam ekran butonu alanı koruma altında.");
+    }, { passive: false });
+</script>
 
 </body>
 </html>
