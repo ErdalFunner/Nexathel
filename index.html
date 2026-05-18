@@ -19,7 +19,8 @@
             align-items: center;
             min-height: 100vh;
             color: white;
-            padding: 20px;
+            padding: 40px 20px;
+            overflow-x: hidden;
         }
 
         .main-container {
@@ -30,6 +31,62 @@
             border-radius: 40px;
             text-align: center;
             box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            position: relative;
+            border: 1px solid #2a2a2a;
+        }
+
+        /* Sabit, Yapışık Duran Siber Asistan Modülü */
+        .cyber-assistant-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: -20px;
+            margin-bottom: 40px;
+        }
+
+        .cyber-assistant-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #00f0ff; 
+            background: #222;
+            padding: 12px 30px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 2px solid #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .live-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #00f0ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00f0ff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7); }
+            70% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 8px rgba(0, 240, 255, 0); }
+            100% { transform: scale(0.9); opacity: 0.6; box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
+        }
+
+        .cyber-assistant-btn:hover {
+            color: #fff;
+            background: #00f0ff;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .cyber-assistant-btn:hover .live-indicator {
+            background-color: #fff;
+            box-shadow: 0 0 10px #fff;
         }
 
         h1.brand {
@@ -53,9 +110,7 @@
         }
 
         @media (orientation: landscape) {
-            .game-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            .game-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
         .game-card {
@@ -107,11 +162,104 @@
             background: #f00;
             transform: translateY(-3px);
         }
+
+        /* ================= FÜTÜRİSTİK GEÇİŞ ANİMASYONU KATMANI ================= */
+        .cyber-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .cyber-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Dijital Tarama Çizgisi */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #00f0ff;
+            box-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff;
+            opacity: 0;
+        }
+
+        .cyber-overlay.active .scan-line {
+            animation: scan 1.2s linear infinite;
+            opacity: 1;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        /* Matrix / Veri Yükleme Çemberi */
+        .cyber-spinner {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px dashed rgba(0, 240, 255, 0.2);
+            border-top: 2px solid #00f0ff;
+            border-bottom: 2px solid #00f0ff;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cyber-text {
+            color: #00f0ff;
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #00f0ff;
+            animation: glitch-text 0.6s infinite alternate;
+        }
+
+        @keyframes glitch-text {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; text-shadow: 0 0 15px #00f0ff, 2px 2px #ff0055; }
+        }
     </style>
 </head>
 <body>
 
+<div class="cyber-overlay" id="cyberOverlay">
+    <div class="scan-line"></div>
+    <div class="cyber-spinner"></div>
+    <div class="cyber-text">BAĞLANTI KURULUYOR...</div>
+</div>
+
 <div class="main-container">
+
+    <div class="cyber-assistant-wrapper">
+        <div class="cyber-assistant-btn" onclick="startCyberTransition('asistan.html')">
+            <div class="live-indicator"></div>
+            Nexathel v16 Asistanı
+        </div>
+    </div>
+
     <h1 class="brand">Nexathel | v16</h1>
     <h2 class="subtitle">Oyun Seçiniz</h2>
     
@@ -179,6 +327,21 @@
 
     <a href="görevler.html" class="footer-btn">Görevler</a>
 </div>
+
+<script>
+    // Fütüristik Geçişi Başlatan Fonksiyon
+    function startCyberTransition(targetUrl) {
+        const overlay = document.getElementById('cyberOverlay');
+        
+        // Animasyon ekranını aktif et
+        overlay.classList.add('active');
+        
+        // 1.5 saniye animasyon oynatıldıktan sonra sayfaya yönlendir
+        setTimeout(() => {
+            window.location.href = targetUrl;
+        }, 1500);
+    }
+</script>
 
 </body>
 </html>
