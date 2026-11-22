@@ -168,7 +168,6 @@
     </div>
 
     <script>
-        const API_KEY = "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";
         let activeUser = "";
         let deviceId = "";
 
@@ -282,9 +281,9 @@ Platform Bilgileri:
             addBubble("Düşünüyorum...", 'ai-msg', aiId);
 
             try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
+                const res = await fetch("/.netlify/functions/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
                         model: "llama-3.3-70b-versatile", 
                         messages: [
