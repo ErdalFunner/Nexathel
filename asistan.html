@@ -293,9 +293,13 @@ Platform Bilgileri:
                     })
                 });
                 const data = await res.json();
-                document.getElementById(aiId).innerText = data.choices[0].message.content;
-            } catch {
-                document.getElementById(aiId).innerText = "Nexathel sistemi şu an yanıt veremiyor.";
+    if (!res.ok) {
+      throw new Error(data.error?.message || data.error || "Hata kodu: " + res.status);
+    }
+    document.getElementById(aiId).innerText = data.choices[0].message.content;
+  } catch (err) {
+    document.getElementById(aiId).innerText = "Hata detayı: " + err.message;
+  }
             }
         }
 
