@@ -7,6 +7,16 @@ exports.handler = async function (event) {
     const body = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
 
+    if (!apiKey) {
+      return {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choices: [{ message: { content: "HATA: GEMINI_API_KEY bulunamadı. Netlify Environment Variables kısmını kontrol et." } }]
+        })
+      };
+    }
+
     const systemMsg = body.messages.find(m => m.role === "system")?.content || "";
     const userMsg = body.messages.find(m => m.role === "user")?.content || "";
 
@@ -23,13 +33,20 @@ exports.handler = async function (event) {
     );
 
     const data = await response.json();
+
     if (!response.ok) {
-      return { statusCode: response.status, body: JSON.stringify(data) };
+      const errMsg = data.error?.message || JSON.stringify(data);
+      return {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choices: [{ message: { content: "API HATASI: " + errMsg } }]
+        })
+      };
     }
 
     const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt üretilemedi.";
 
-    // asistan.html yapısını bozmamak için aynı formatta döndür
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
@@ -39,8 +56,11 @@ exports.handler = async function (event) {
     };
   } catch (error) {
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        choices: [{ message: { content: "SUNUCU HATASI: " + error.message } }]
+      })
     };
   }
 };
