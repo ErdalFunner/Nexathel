@@ -243,75 +243,101 @@ Platform Bilgileri:
 
         function startCooldown(duration) {
             const btn = document.getElementById("send-btn");
-            const inp = document.getElementById("msg-input");
-            const box = document.getElementById("cooldown-box");
-            const clock = document.getElementById("cd-timer");
+<script>
+  let activeUser = "";
+  let deviceId = "";
 
-            btn.disabled = true;
-            inp.disabled = true;
-            box.classList.remove("hidden");
-
-            let remaining = duration;
-            const timer = setInterval(() => {
-                remaining -= 1000;
-                let mins = Math.floor(remaining / 60000);
-                let secs = Math.floor((remaining % 60000) / 1000);
-                clock.innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-
-                if (remaining <= 0) {
-                    clearInterval(timer);
-                    btn.disabled = false;
-                    inp.disabled = false;
-                    box.classList.add("hidden");
-                }
-            }, 1000);
-        }
-
-        async function processMessage() {
-            const inp = document.getElementById("msg-input");
-            const text = inp.value.trim();
-            if (!text) return;
-
-            localStorage.setItem(`last_${deviceId}`, Date.now().toString());
-            addBubble(text, 'u-msg');
-            inp.value = "";
-            startCooldown(120000);
-
-            const aiId = "ai-" + Date.now();
-            addBubble("Düşünüyorum...", 'ai-msg', aiId);
-
-            try {
-                const res = await fetch("/.netlify/functions/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        model: "llama-3.3-70b-versatile", 
-                        messages: [
-                            { role: "system", content: SYSTEM_PROMPT },
-                            { role: "user", content: text }
-                        ] 
-                    })
-                });
-                const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error?.message || data.error || "Hata kodu: " + res.status);
-    }
-    document.getElementById(aiId).innerText = data.choices[0].message.content;
-  } catch (err) {
-    document.getElementById(aiId).innerText = "Hata detayı: " + err.message;
+  if (!localStorage.getItem('nex_dev_id')) {
+    localStorage.setItem('nex_dev_id', 'dev_' + Math.random().toString(36).substr(2, 9));
   }
-            }
-        }
+  deviceId = localStorage.getItem('nex_dev_id');
 
-        function addBubble(text, cls, id = "") {
-            const flow = document.getElementById("chat-flow");
-            const d = document.createElement("div");
-            d.className = `bubble ${cls}`;
-            if(id) d.id = id;
-            d.innerText = text;
-            flow.appendChild(d);
-            flow.scrollTop = flow.scrollHeight;
-        }
-    </script>
+  const SYSTEM_PROMPT = "Sen Nexathel v16 platformunun resmi ve uzman yapay zeka asistanısın. Kısa, net ve yardımcı cevaplar ver.";
+
+  function launchApp() {
+    const nameInput = document.getElementById("uname");
+    const name = nameInput ? nameInput.value.trim() : "Misafir";
+    if (!name) return;
+    activeUser = name.toLowerCase();
+
+    document.getElementById("login-screen").classList.add("hidden");
+    document.getElementById("main-app").classList.remove("hidden");
+  }
+
+  function startCooldown(ms) {
+    const btn = document.getElementById("send-btn");
+    const box = document.getElementById("cooldown-box");
+    const timer = document.getElementById("cd-timer");
+    if (btn) btn.disabled = true;
+    if (box) box.classList.remove("hidden");
+
+    const end = Date.now() + ms;
+    const iv = setInterval(() => {
+      const rem = Math.max(0, end - Date.now());
+      const s = Math.ceil(rem / 1000);
+      const m = String(Math.floor(s / 60)).padStart(2, '0');
+      const sec = String(s % 60).padStart(2, '0');
+      if (timer) timer.innerText = `${m}:${sec}`;
+      if (rem <= 0) {
+        clearInterval(iv);
+        if (btn) btn.disabled = false;
+        if (box) box.classList.add("hidden");
+      }
+    }, 500);
+  }
+
+  async function processMessage() {
+    const inp = document.getElementById("msg-input");
+    const text = inp.value.trim();
+    if (!text) return;
+
+    localStorage.setItem(`last_${deviceId}`, Date.now().toString());
+    addBubble(text, 'u-msg');
+    inp.value = "";
+    startCooldown(120000);
+
+    const aiId = "ai-" + Date.now();
+    addBubble("Düşünüyorum...", 'ai-msg', aiId);
+
+    try {
+      const res = await fetch("/.netlify/functions/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: text }
+          ]
+        })
+      });
+
+      const rawText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error("Sunucu JSON döndürmedi: " + rawText.slice(0, 120));
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error?.message || data.error || "Hata kodu: " + res.status);
+      }
+      document.getElementById(aiId).innerText = data.choices[0].message.content;
+    } catch (err) {
+      document.getElementById(aiId).innerText = "Hata detayı: " + err.message;
+    }
+  }
+
+  function addBubble(text, cls, id = "") {
+    const flow = document.getElementById("chat-flow");
+    const div = document.createElement("div");
+    div.className = "msg " + cls;
+    if (id) div.id = id;
+    div.innerText = text;
+    flow.appendChild(div);
+    flow.scrollTop = flow.scrollHeight;
+  }
+</script>
 </body>
 </html>
