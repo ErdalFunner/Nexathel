@@ -272,7 +272,7 @@ Platform Bilgileri:
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
+                        model: "llama-3.1-8b-instant",
                         messages: [
                             { role: "system", content: SYSTEM_PROMPT },
                             { role: "user", content: text }
@@ -280,20 +280,11 @@ Platform Bilgileri:
                     })
                 });
 
-                const rawText = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                } catch {
-                    throw new Error("Sunucu yanıtı bozuk: " + rawText.slice(0, 100));
-                }
-
-                if (!res.ok) {
-                    throw new Error(data.error?.message || data.error || "Hata kodu: " + res.status);
-                }
+                const data = await res.json();
+                if (!res.ok) throw new Error();
                 document.getElementById(aiId).innerText = data.choices[0].message.content;
-            } catch (err) {
-                document.getElementById(aiId).innerText = "Hata detayı: " + err.message;
+            } catch {
+                document.getElementById(aiId).innerText = "Nexathel sistemi şu an yanıt veremiyor.";
             }
         }
 
