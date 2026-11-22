@@ -240,26 +240,18 @@ Platform Bilgileri:
             const diff = Date.now() - last;
             if (diff < 120000) startCooldown(120000 - diff);
         }
-
-        function startCooldown(duration) {
-            const btn = document.getElementById("send-btn");
 <script>
   let activeUser = "";
-  let deviceId = "";
-
-  if (!localStorage.getItem('nex_dev_id')) {
-    localStorage.setItem('nex_dev_id', 'dev_' + Math.random().toString(36).substr(2, 9));
-  }
-  deviceId = localStorage.getItem('nex_dev_id');
+  let deviceId = localStorage.getItem('nex_dev_id') || ('dev_' + Math.random().toString(36).substr(2, 9));
+  localStorage.setItem('nex_dev_id', deviceId);
 
   const SYSTEM_PROMPT = "Sen Nexathel v16 platformunun resmi ve uzman yapay zeka asistanısın. Kısa, net ve yardımcı cevaplar ver.";
 
   function launchApp() {
-    const nameInput = document.getElementById("uname");
-    const name = nameInput ? nameInput.value.trim() : "Misafir";
+    const name = document.getElementById("uname").value.trim();
     if (!name) return;
     activeUser = name.toLowerCase();
-
+    document.getElementById("user-tag").innerText = "NEXATHEL // " + name.toUpperCase();
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("main-app").classList.remove("hidden");
   }
@@ -291,7 +283,6 @@ Platform Bilgileri:
     const text = inp.value.trim();
     if (!text) return;
 
-    localStorage.setItem(`last_${deviceId}`, Date.now().toString());
     addBubble(text, 'u-msg');
     inp.value = "";
     startCooldown(120000);
@@ -317,7 +308,7 @@ Platform Bilgileri:
       try {
         data = JSON.parse(rawText);
       } catch {
-        throw new Error("Sunucu JSON döndürmedi: " + rawText.slice(0, 120));
+        throw new Error("Sunucu yanıtı bozuk: " + rawText.slice(0, 100));
       }
 
       if (!res.ok) {
