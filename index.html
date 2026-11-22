@@ -186,7 +186,6 @@
             pointer-events: auto;
         }
 
-        /* Dijital Tarama Çizgisi */
         .scan-line {
             position: absolute;
             top: 0;
@@ -209,7 +208,6 @@
             100% { top: 0%; }
         }
 
-        /* Matrix / Veri Yükleme Çemberi */
         .cyber-spinner {
             position: relative;
             width: 100px;
@@ -323,20 +321,21 @@
             <img src="çubuk.png" alt="Stickman Savaş">
             <span>Stickman Savaş</span>
         </a>
+
+        <!-- Yeni Eklenen: Karanlık Koridorlar -->
+        <a href="karanlık_koridorlar.html" class="game-card">
+            <img src="karanlık.png" alt="Karanlık Koridorlar">
+            <span>Karanlık Koridorlar</span>
+        </a>
     </div>
 
     <a href="görevler.html" class="footer-btn">Görevler</a>
 </div>
 
 <script>
-    // Fütüristik Geçişi Başlatan Fonksiyon
     function startCyberTransition(targetUrl) {
         const overlay = document.getElementById('cyberOverlay');
-        
-        // Animasyon ekranını aktif et
         overlay.classList.add('active');
-        
-        // 1.5 saniye animasyon oynatıldıktan sonra sayfaya yönlendir
         setTimeout(() => {
             window.location.href = targetUrl;
         }, 1500);
