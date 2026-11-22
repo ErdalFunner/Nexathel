@@ -18,8 +18,7 @@ exports.handler = async function (event) {
           systemInstruction: { parts: [{ text: systemMsg }] },
           contents: [{ role: "user", parts: [{ text: userMsg }] }],
           generationConfig: {
-            maxOutputTokens: 300,
-            thinkingConfig: { thinkingBudget: 0 }
+            maxOutputTokens: 300
           }
         })
       }
