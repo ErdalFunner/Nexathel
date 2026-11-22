@@ -5,39 +5,37 @@ exports.handler = async function (event) {
 
   try {
     const body = JSON.parse(event.body);
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    // Hesapta aktif olan modelleri otomatik sorgula
-    const modelsRes = await fetch("https://api.groq.com/openai/v1/models", {
-      headers: { "Authorization": `Bearer ${apiKey}` }
-    });
-    const modelsData = await modelsRes.json();
+    const systemMsg = body.messages.find(m => m.role === "system")?.content || "";
+    const userMsg = body.messages.find(m => m.role === "user")?.content || "";
 
-    if (!modelsRes.ok) {
-      return {
-        statusCode: modelsRes.status,
-        body: JSON.stringify(modelsData)
-      };
-    }
-
-    // Whisper (ses) modellerini eleyip ilk uygun sohbet modelini seç
-    const chatModel = modelsData.data.find(m => !m.id.includes("whisper") && !m.id.includes("guard"))?.id || body.model;
-    body.model = chatModel;
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemMsg }] },
+          contents: [{ role: "user", parts: [{ text: userMsg }] }]
+        })
+      }
+    );
 
     const data = await response.json();
+    if (!response.ok) {
+      return { statusCode: response.status, body: JSON.stringify(data) };
+    }
+
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt üretilemedi.";
+
+    // asistan.html yapısını bozmamak için aynı formatta döndür
     return {
-      statusCode: response.status,
+      statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        choices: [{ message: { content: replyText } }]
+      })
     };
   } catch (error) {
     return {
