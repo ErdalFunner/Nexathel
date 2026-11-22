@@ -10,13 +10,12 @@ exports.handler = async function (event) {
     const systemMsg = body.messages.find(m => m.role === "system")?.content || "";
     const userMsg = body.messages.find(m => m.role === "user")?.content || "";
 
-    // En hızlı yanıt veren modelleri sırayla dene (10 sn Netlify sınırına takılmamak için)
-    const modelsToTry = ["gemini-3.8-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash-lite"];
+    const modelsToTry = ["gemini-3.5-flash-lite", "gemini-3.5-flash"];
     let lastError = "";
 
     for (const modelName of modelsToTry) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000); // Her model için max 8 sn bekle
+      const timeout = setTimeout(() => controller.abort(), 8000);
 
       try {
         const response = await fetch(
@@ -53,7 +52,6 @@ exports.handler = async function (event) {
       }
     }
 
-    // Hiçbiri çalışmazsa gerçek sebebi ekranda göster
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
