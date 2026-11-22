@@ -5,10 +5,29 @@ exports.handler = async function (event) {
 
   try {
     const body = JSON.parse(event.body);
+    const apiKey = process.env.GROQ_API_KEY;
+
+    // Hesapta aktif olan modelleri otomatik sorgula
+    const modelsRes = await fetch("https://api.groq.com/openai/v1/models", {
+      headers: { "Authorization": `Bearer ${apiKey}` }
+    });
+    const modelsData = await modelsRes.json();
+
+    if (!modelsRes.ok) {
+      return {
+        statusCode: modelsRes.status,
+        body: JSON.stringify(modelsData)
+      };
+    }
+
+    // Whisper (ses) modellerini eleyip ilk uygun sohbet modelini seç
+    const chatModel = modelsData.data.find(m => !m.id.includes("whisper") && !m.id.includes("guard"))?.id || body.model;
+    body.model = chatModel;
+
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
@@ -23,7 +42,7 @@ exports.handler = async function (event) {
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Sunucu hatasi" })
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
