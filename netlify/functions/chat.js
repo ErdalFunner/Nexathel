@@ -6,7 +6,7 @@ exports.handler = async function (event) {
   try {
     const body = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
-    const systemMsg = body.messages.find(m => m.role === "system")?.content || "";
+    const systemMsg = (body.messages.find(m => m.role === "system")?.content || "") + "\n\nÖnemli: Cevaplarını kısa, net ve tamamlanmış cümlelerle ver.";
     const userMsg = body.messages.find(m => m.role === "user")?.content || "";
 
     const response = await fetch(
@@ -18,7 +18,7 @@ exports.handler = async function (event) {
           systemInstruction: { parts: [{ text: systemMsg }] },
           contents: [{ role: "user", parts: [{ text: userMsg }] }],
           generationConfig: {
-            maxOutputTokens: 300
+            maxOutputTokens: 2048
           }
         })
       }
