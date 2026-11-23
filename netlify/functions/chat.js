@@ -9,43 +9,44 @@ exports.handler = async function (event) {
     const systemMsg = (body.messages.find(m => m.role === "system")?.content || "") + "\n\nÖnemli: Kısa ve tamamlanmış cümlelerle cevap ver.";
     const userMsg = body.messages.find(m => m.role === "user")?.content || "";
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemMsg }] },
-          contents: [{ role: "user", parts: [{ text: userMsg }] }]
-        })
+    // Yoğunluk (high demand) durumunda otomatik olarak bir sonraki aktif modele geçer
+    const models = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"];
+
+    for (const model of models) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemMsg }] },
+            contents: [{ role: "user", parts: [{ text: userMsg }] }]
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt üretilemedi.";
+        return {
+          statusCode: 200,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ choices: [{ message: { content: replyText } }] })
+        };
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        statusCode: 200,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          choices: [{ message: { content: "HATA: " + (data.error?.message || response.status) } }]
-        })
-      };
     }
 
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt üretilemedi.";
     return {
-      statusCode: 200,
+      statusCode: 503,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ choices: [{ message: { content: replyText } }] })
+      body: JSON.stringify({ error: "Sunucular şu an yoğun, lütfen biraz sonra tekrar dene." })
     };
   } catch (error) {
     return {
-      statusCode: 200,
+      statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        choices: [{ message: { content: "SUNUCU HATASI: " + error.message } }]
-      })
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
