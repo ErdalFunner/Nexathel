@@ -6,7 +6,7 @@ exports.handler = async function (event) {
   try {
     const body = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
-    const systemMsg = (body.messages.find(m => m.role === "system")?.content || "") + "\n\nÖnemli: Cevaplarını kısa, net ve tamamlanmış cümlelerle ver.";
+    const systemMsg = (body.messages.find(m => m.role === "system")?.content || "") + "\n\nÖnemli: Kısa ve tamamlanmış cümlelerle cevap ver.";
     const userMsg = body.messages.find(m => m.role === "user")?.content || "";
 
     const response = await fetch(
@@ -16,17 +16,21 @@ exports.handler = async function (event) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemMsg }] },
-          contents: [{ role: "user", parts: [{ text: userMsg }] }],
-          generationConfig: {
-            maxOutputTokens: 2048
-          }
+          contents: [{ role: "user", parts: [{ text: userMsg }] }]
         })
       }
     );
 
     const data = await response.json();
+
     if (!response.ok) {
-      return { statusCode: response.status, body: JSON.stringify(data) };
+      return {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choices: [{ message: { content: "HATA: " + (data.error?.message || response.status) } }]
+        })
+      };
     }
 
     const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt üretilemedi.";
@@ -36,6 +40,12 @@ exports.handler = async function (event) {
       body: JSON.stringify({ choices: [{ message: { content: replyText } }] })
     };
   } catch (error) {
-    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        choices: [{ message: { content: "SUNUCU HATASI: " + error.message } }]
+      })
+    };
   }
 };
